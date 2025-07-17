@@ -16,7 +16,6 @@ import { Badge } from "@/components/ui/badge";
 
 const DEFAULT_GROUP_SIZE = 8;
 
-
 interface Attendee {
   name: string;
   age: number;
@@ -50,7 +49,8 @@ function parseCSV(csvText: string): Attendee[] {
     age: parseInt(row.age) || 0,
     gender: row.gender?.trim() || "",
     bipoc:
-      row.isBIPOC?.toLowerCase() === "true" || row.isBIPOC?.toLowerCase() === "yes",
+      row.isBIPOC?.toLowerCase() === "true" ||
+      row.isBIPOC?.toLowerCase() === "yes",
     lgbtqia:
       row.isLGBTQIA?.toLowerCase() === "true" ||
       row.isLGBTQIA?.toLowerCase() === "yes",
@@ -83,14 +83,16 @@ function distributeIntoGroups(
   groupSize: number = DEFAULT_GROUP_SIZE
 ): Group[] {
   const numGroups = Math.ceil(attendees.length / groupSize);
-  const groups: Attendee[][] = Array(numGroups).fill(null).map(() => []);
-  
+  const groups: Attendee[][] = Array(numGroups)
+    .fill(null)
+    .map(() => []);
+
   // Step 1: Categorize attendees
-  const bipocAndLgbtqia = attendees.filter(a => a.bipoc && a.lgbtqia);
-  const bipocOnly = attendees.filter(a => a.bipoc && !a.lgbtqia);
-  const lgbtqiaOnly = attendees.filter(a => !a.bipoc && a.lgbtqia);
-  const neither = attendees.filter(a => !a.bipoc && !a.lgbtqia);
-  
+  const bipocAndLgbtqia = attendees.filter((a) => a.bipoc && a.lgbtqia);
+  const bipocOnly = attendees.filter((a) => a.bipoc && !a.lgbtqia);
+  const lgbtqiaOnly = attendees.filter((a) => !a.bipoc && a.lgbtqia);
+  const neither = attendees.filter((a) => !a.bipoc && !a.lgbtqia);
+
   // Helper function to shuffle an array
   const shuffle = (array: Attendee[]) => {
     const shuffled = [...array];
@@ -100,7 +102,7 @@ function distributeIntoGroups(
     }
     return shuffled;
   };
-  
+
   // Helper function to find smallest group
   const findSmallestGroup = () => {
     let smallestIndex = 0;
@@ -113,9 +115,9 @@ function distributeIntoGroups(
     }
     return smallestIndex;
   };
-  
+
   let currentGroupIndex = 0;
-  
+
   // Step 2: Seed groups with BIPOC and LGBTQIA pairs
   const shuffledBipocAndLgbtqia = shuffle(bipocAndLgbtqia);
   for (let i = 0; i < shuffledBipocAndLgbtqia.length; i += 2) {
@@ -126,7 +128,7 @@ function distributeIntoGroups(
       currentGroupIndex = (currentGroupIndex + 1) % numGroups;
     }
   }
-  
+
   // Step 3: Seed groups with BIPOC only pairs
   const shuffledBipocOnly = shuffle(bipocOnly);
   for (let i = 0; i < shuffledBipocOnly.length; i += 2) {
@@ -136,7 +138,7 @@ function distributeIntoGroups(
       currentGroupIndex = (currentGroupIndex + 1) % numGroups;
     }
   }
-  
+
   // Step 4: Seed groups with LGBTQIA only pairs
   const shuffledLgbtqiaOnly = shuffle(lgbtqiaOnly);
   for (let i = 0; i < shuffledLgbtqiaOnly.length; i += 2) {
@@ -146,18 +148,19 @@ function distributeIntoGroups(
       currentGroupIndex = (currentGroupIndex + 1) % numGroups;
     }
   }
-  
+
   // Step 5: Place leftover individuals
   const leftovers: Attendee[] = [];
-  
+
   // Leftover from BIPOC and LGBTQIA
   if (shuffledBipocAndLgbtqia.length % 2 === 1) {
-    const leftover = shuffledBipocAndLgbtqia[shuffledBipocAndLgbtqia.length - 1];
+    const leftover =
+      shuffledBipocAndLgbtqia[shuffledBipocAndLgbtqia.length - 1];
     // Find group with existing BIPOC and LGBTQIA members
     let placed = false;
     for (let i = 0; i < groups.length; i++) {
-      const hasBipoc = groups[i].some(m => m.bipoc);
-      const hasLgbtqia = groups[i].some(m => m.lgbtqia);
+      const hasBipoc = groups[i].some((m) => m.bipoc);
+      const hasLgbtqia = groups[i].some((m) => m.lgbtqia);
       if (hasBipoc && hasLgbtqia) {
         groups[i].push(leftover);
         placed = true;
@@ -169,14 +172,14 @@ function distributeIntoGroups(
       leftovers.push(leftover);
     }
   }
-  
+
   // Leftover from BIPOC only
   if (shuffledBipocOnly.length % 2 === 1) {
     const leftover = shuffledBipocOnly[shuffledBipocOnly.length - 1];
     // Find group with existing BIPOC members
     let placed = false;
     for (let i = 0; i < groups.length; i++) {
-      const hasBipoc = groups[i].some(m => m.bipoc);
+      const hasBipoc = groups[i].some((m) => m.bipoc);
       if (hasBipoc) {
         groups[i].push(leftover);
         placed = true;
@@ -188,14 +191,14 @@ function distributeIntoGroups(
       leftovers.push(leftover);
     }
   }
-  
+
   // Leftover from LGBTQIA only
   if (shuffledLgbtqiaOnly.length % 2 === 1) {
     const leftover = shuffledLgbtqiaOnly[shuffledLgbtqiaOnly.length - 1];
     // Find group with existing LGBTQIA members
     let placed = false;
     for (let i = 0; i < groups.length; i++) {
-      const hasLgbtqia = groups[i].some(m => m.lgbtqia);
+      const hasLgbtqia = groups[i].some((m) => m.lgbtqia);
       if (hasLgbtqia) {
         groups[i].push(leftover);
         placed = true;
@@ -207,16 +210,16 @@ function distributeIntoGroups(
       leftovers.push(leftover);
     }
   }
-  
+
   // Step 6: Distribute remaining attendees (neither category + any unplaced leftovers)
   const remainingAttendees = [...neither, ...leftovers];
   const shuffledRemaining = shuffle(remainingAttendees);
-  
+
   for (const attendee of shuffledRemaining) {
     const smallestGroupIndex = findSmallestGroup();
     groups[smallestGroupIndex].push(attendee);
   }
-  
+
   // Convert to Group objects
   return groups.map((members, index) => ({
     id: index + 1,
@@ -252,22 +255,38 @@ export default function Home() {
 
   const handleLoadSampleData = async () => {
     try {
-      const response = await fetch('/sample-attendees.csv');
+      const response = await fetch("/sample-attendees.csv");
       const csvText = await response.text();
       const parsedAttendees = parseCSV(csvText);
       setAttendees(parsedAttendees);
       setGroups([]);
     } catch (error) {
-      console.error('Error loading sample data:', error);
+      console.error("Error loading sample data:", error);
+    }
+  };
+
+  const handleDownloadTemplate = async () => {
+    try {
+      const response = await fetch("/sample-attendees.csv");
+      const csvText = await response.text();
+      const blob = new Blob([csvText], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "attendees-template.csv";
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Error downloading template:", error);
     }
   };
 
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-foreground mb-8">
-          DharmaPods
-        </h1>
+        <h1 className="text-3xl font-bold text-foreground mb-8">DharmaPods</h1>
 
         <Card className="mb-8">
           <CardHeader>
@@ -293,11 +312,11 @@ export default function Home() {
                   </label>
                 </Button>
               </div>
-              <Button 
-                onClick={handleLoadSampleData}
-                variant="outline"
-              >
+              <Button onClick={handleLoadSampleData} variant="outline">
                 Use Sample Data
+              </Button>
+              <Button onClick={handleDownloadTemplate} variant="outline">
+                Download Template
               </Button>
             </div>
             <div>
@@ -330,8 +349,8 @@ export default function Home() {
                 className="w-16"
               />
             </div>
-            <Button 
-              onClick={handleDistributeGroups} 
+            <Button
+              onClick={handleDistributeGroups}
               className="w-full"
               disabled={attendees.length === 0}
             >
@@ -387,7 +406,10 @@ export default function Home() {
                       Avg Age
                     </h3>
                     <p className="text-2xl font-bold text-blue-600">
-                      {Math.round(attendees.reduce((sum, a) => sum + a.age, 0) / attendees.length)}
+                      {Math.round(
+                        attendees.reduce((sum, a) => sum + a.age, 0) /
+                          attendees.length
+                      )}
                     </p>
                   </div>
                   <div className="bg-muted p-4 rounded">
@@ -395,15 +417,25 @@ export default function Home() {
                       Avg Experience
                     </h3>
                     <p className="text-2xl font-bold text-green-600">
-                      {Math.round(attendees.reduce((sum, a) => sum + a.experienceDays, 0) / attendees.length)} days
+                      {Math.round(
+                        attendees.reduce(
+                          (sum, a) => sum + a.experienceDays,
+                          0
+                        ) / attendees.length
+                      )}{" "}
+                      days
                     </p>
                   </div>
                   <div className="bg-muted p-4 rounded">
-                    <h3 className="font-medium text-muted-foreground">
-                      BIPOC
-                    </h3>
+                    <h3 className="font-medium text-muted-foreground">BIPOC</h3>
                     <p className="text-2xl font-bold text-purple-600">
-                      {attendees.filter(a => a.bipoc).length} ({Math.round((attendees.filter(a => a.bipoc).length / attendees.length) * 100)}%)
+                      {attendees.filter((a) => a.bipoc).length} (
+                      {Math.round(
+                        (attendees.filter((a) => a.bipoc).length /
+                          attendees.length) *
+                          100
+                      )}
+                      %)
                     </p>
                   </div>
                   <div className="bg-muted p-4 rounded">
@@ -411,7 +443,13 @@ export default function Home() {
                       LGBTQIA
                     </h3>
                     <p className="text-2xl font-bold text-orange-600">
-                      {attendees.filter(a => a.lgbtqia).length} ({Math.round((attendees.filter(a => a.lgbtqia).length / attendees.length) * 100)}%)
+                      {attendees.filter((a) => a.lgbtqia).length} (
+                      {Math.round(
+                        (attendees.filter((a) => a.lgbtqia).length /
+                          attendees.length) *
+                          100
+                      )}
+                      %)
                     </p>
                   </div>
                 </div>
@@ -426,11 +464,7 @@ export default function Home() {
                         return acc;
                       }, {} as Record<string, number>)
                     ).map(([gender, count]) => (
-                      <Badge
-                        key={gender}
-                        variant="outline"
-                        className="text-sm"
-                      >
+                      <Badge key={gender} variant="outline" className="text-sm">
                         {gender}: {count}
                       </Badge>
                     ))}

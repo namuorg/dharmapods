@@ -139,12 +139,12 @@ export function DraggableMember({
       >
         {member.name} ({member.age}, {member.gender})
         {member.bipoc && (
-          <Badge variant="secondary" className="ml-2">
+          <Badge variant="secondary" className="ml-2 bg-amber-100 text-amber-800 hover:bg-amber-200">
             BIPOC
           </Badge>
         )}
         {member.lgbtqia && (
-          <Badge variant="outline" className="ml-2">
+          <Badge variant="outline" className="ml-2 bg-purple-100 text-purple-800 border-purple-300 hover:bg-purple-200">
             LGBTQIA
           </Badge>
         )}

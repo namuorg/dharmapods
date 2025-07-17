@@ -1,103 +1,252 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import Papa from 'papaparse';
+
+interface Attendee {
+  name: string;
+  age: number;
+  gender: string;
+  bipoc: boolean;
+  lgbtqia: boolean;
+  experienceDays: number;
+}
+
+interface Group {
+  id: number;
+  members: Attendee[];
+  demographics: {
+    avgAge: number;
+    genderDistribution: Record<string, number>;
+    bipocCount: number;
+    lgbtqiaCount: number;
+    avgExperience: number;
+  };
+}
+
+function parseCSV(csvText: string): Attendee[] {
+  const result = Papa.parse<Record<string, string>>(csvText, {
+    header: true,
+    skipEmptyLines: true,
+    transformHeader: (header) => header.trim()
+  });
+  
+  return result.data.map(row => ({
+    name: row.name?.trim() || '',
+    age: parseInt(row.age) || 0,
+    gender: row.gender?.trim() || '',
+    bipoc: row.bipoc?.toLowerCase() === 'true' || row.bipoc?.toLowerCase() === 'yes',
+    lgbtqia: row.lgbtqia?.toLowerCase() === 'true' || row.lgbtqia?.toLowerCase() === 'yes',
+    experienceDays: parseInt(row.experienceDays) || 0
+  }));
+}
+
+function calculateGroupDemographics(members: Attendee[]) {
+  const avgAge = members.reduce((sum, m) => sum + m.age, 0) / members.length;
+  const genderDistribution = members.reduce((acc, m) => {
+    acc[m.gender] = (acc[m.gender] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+  const bipocCount = members.filter(m => m.bipoc).length;
+  const lgbtqiaCount = members.filter(m => m.lgbtqia).length;
+  const avgExperience = members.reduce((sum, m) => sum + m.experienceDays, 0) / members.length;
+  
+  return {
+    avgAge: Math.round(avgAge),
+    genderDistribution,
+    bipocCount,
+    lgbtqiaCount,
+    avgExperience: Math.round(avgExperience)
+  };
+}
+
+function distributeIntoGroups(attendees: Attendee[], groupSize: number = 8): Group[] {
+  const groups: Group[] = [];
+  const remaining = [...attendees];
+  
+  while (remaining.length > 0) {
+    const group: Attendee[] = [];
+    const currentGroupSize = Math.min(groupSize, remaining.length);
+    
+    for (let i = 0; i < currentGroupSize; i++) {
+      if (remaining.length === 0) break;
+      
+      let selectedIndex = 0;
+      
+      if (group.length > 0) {
+        const bipocInGroup = group.filter(m => m.bipoc).length;
+        const lgbtqiaInGroup = group.filter(m => m.lgbtqia).length;
+        
+        const bipocCandidates = remaining.filter(m => m.bipoc);
+        const lgbtqiaCandidates = remaining.filter(m => m.lgbtqia);
+        
+        if (bipocInGroup === 1 && bipocCandidates.length > 0) {
+          selectedIndex = remaining.findIndex(m => m.bipoc);
+        } else if (lgbtqiaInGroup === 1 && lgbtqiaCandidates.length > 0) {
+          selectedIndex = remaining.findIndex(m => m.lgbtqia);
+        } else {
+          selectedIndex = Math.floor(Math.random() * remaining.length);
+        }
+      } else {
+        selectedIndex = Math.floor(Math.random() * remaining.length);
+      }
+      
+      group.push(remaining.splice(selectedIndex, 1)[0]);
+    }
+    
+    groups.push({
+      id: groups.length + 1,
+      members: group,
+      demographics: calculateGroupDemographics(group)
+    });
+  }
+  
+  return groups;
+}
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [attendees, setAttendees] = useState<Attendee[]>([]);
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [groupSize, setGroupSize] = useState(8);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const csvText = e.target?.result as string;
+        const parsedAttendees = parseCSV(csvText);
+        setAttendees(parsedAttendees);
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const handleDistributeGroups = () => {
+    if (attendees.length > 0) {
+      const distributedGroups = distributeIntoGroups(attendees, groupSize);
+      setGroups(distributedGroups);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">Retreat Group Distribution</h1>
+        
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-4">Upload Attendees CSV</h2>
+          <p className="text-gray-600 mb-4">
+            CSV should have columns: name, age, gender, bipoc, lgbtqia, experienceDays
+          </p>
+          <div className="flex gap-4 items-center">
+            <input
+              type="file"
+              accept=".csv"
+              onChange={handleFileUpload}
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            <div className="flex items-center gap-2">
+              <label htmlFor="groupSize" className="text-sm font-medium text-gray-700">
+                Group Size:
+              </label>
+              <input
+                id="groupSize"
+                type="number"
+                min="3"
+                max="12"
+                value={groupSize}
+                onChange={(e) => setGroupSize(parseInt(e.target.value))}
+                className="w-16 px-2 py-1 border border-gray-300 rounded text-sm"
+              />
+            </div>
+          </div>
+          {attendees.length > 0 && (
+            <div className="mt-4">
+              <p className="text-green-600 font-medium">{attendees.length} attendees loaded</p>
+              <button
+                onClick={handleDistributeGroups}
+                className="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              >
+                Distribute into Groups
+              </button>
+            </div>
+          )}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        {groups.length > 0 && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-semibold mb-4">Distribution Summary</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-gray-50 p-4 rounded">
+                  <h3 className="font-medium text-gray-700">Total Groups</h3>
+                  <p className="text-2xl font-bold text-blue-600">{groups.length}</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded">
+                  <h3 className="font-medium text-gray-700">Total Attendees</h3>
+                  <p className="text-2xl font-bold text-green-600">{attendees.length}</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded">
+                  <h3 className="font-medium text-gray-700">Avg Group Size</h3>
+                  <p className="text-2xl font-bold text-purple-600">
+                    {Math.round(attendees.length / groups.length)}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {groups.map((group) => (
+                <div key={group.id} className="bg-white rounded-lg shadow-md p-6">
+                  <h3 className="text-lg font-semibold mb-4">Group {group.id}</h3>
+                  
+                  <div className="mb-4">
+                    <h4 className="font-medium text-gray-700 mb-2">Members ({group.members.length})</h4>
+                    <div className="space-y-1">
+                      {group.members.map((member, index) => (
+                        <div key={index} className="text-sm text-gray-600">
+                          {member.name} ({member.age}, {member.gender})
+                          {member.bipoc && <span className="ml-2 text-blue-600">BIPOC</span>}
+                          {member.lgbtqia && <span className="ml-2 text-purple-600">LGBTQIA</span>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-4">
+                    <h4 className="font-medium text-gray-700 mb-2">Demographics</h4>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <span className="text-gray-600">Avg Age:</span> {group.demographics.avgAge}
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Avg Experience:</span> {group.demographics.avgExperience} days
+                      </div>
+                      <div>
+                        <span className="text-gray-600">BIPOC:</span> {group.demographics.bipocCount}
+                      </div>
+                      <div>
+                        <span className="text-gray-600">LGBTQIA:</span> {group.demographics.lgbtqiaCount}
+                      </div>
+                    </div>
+                    <div className="mt-2">
+                      <span className="text-gray-600 text-sm">Gender Distribution:</span>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {Object.entries(group.demographics.genderDistribution).map(([gender, count]) => (
+                          <span key={gender} className="text-xs bg-gray-100 px-2 py-1 rounded">
+                            {gender}: {count}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

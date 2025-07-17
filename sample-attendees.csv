@@ -1,0 +1,27 @@
+name,age,gender,bipoc,lgbtqia,experienceDays
+Alice Johnson,28,Female,false,true,5
+Bob Smith,34,Male,false,false,12
+Carmen Rodriguez,26,Female,true,false,3
+David Kim,31,Male,true,false,8
+Emily Chen,29,Female,true,true,1
+Frank Wilson,45,Male,false,false,15
+Grace Patel,33,Female,true,false,7
+Henry Brown,27,Male,false,true,2
+Isabella Martinez,30,Female,true,false,10
+Jake Thompson,36,Male,false,false,4
+Kaia Williams,24,Non-binary,true,true,0
+Lucas Davis,32,Male,false,false,6
+Maya Singh,28,Female,true,false,9
+Nathan Lee,35,Male,true,true,11
+Olivia Garcia,29,Female,true,false,3
+Paul Anderson,41,Male,false,false,14
+Quinn Taylor,26,Non-binary,false,true,1
+Rachel White,33,Female,false,false,8
+Sam Jackson,30,Male,true,false,5
+Tara Murphy,27,Female,false,true,2
+Uma Gupta,31,Female,true,false,7
+Victor Lopez,38,Male,true,false,13
+Wendy Clark,25,Female,false,false,1
+Xavier Hayes,34,Male,false,true,6
+Yuki Tanaka,29,Female,true,false,4
+Zoe Mitchell,32,Female,false,true,9

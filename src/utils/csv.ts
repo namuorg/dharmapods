@@ -23,6 +23,73 @@ export function parseCSV(csvText: string): Attendee[] {
   }));
 }
 
+export function parseGroupsCSV(csvText: string): import("@/types").Group[] {
+  const result = Papa.parse<Record<string, string>>(csvText, {
+    header: true,
+    skipEmptyLines: true,
+    transformHeader: (header) => header.trim(),
+  });
+
+  const groupsMap = new Map<number, import("@/types").Group>();
+
+  result.data.forEach((row) => {
+    const groupId = parseInt(row.groupId) || 0;
+    const member: Attendee = {
+      id: `attendee-${Date.now()}-${Math.random()}`,
+      name: row.name?.trim() || "",
+      age: parseInt(row.age) || 0,
+      gender: row.gender?.trim() || "",
+      bipoc:
+        row.isBIPOC?.toLowerCase() === "true" ||
+        row.isBIPOC?.toLowerCase() === "yes",
+      lgbtqia:
+        row.isLGBTQIA?.toLowerCase() === "true" ||
+        row.isLGBTQIA?.toLowerCase() === "yes",
+      experienceDays: parseInt(row.experienceDays) || 0,
+    };
+
+    if (!groupsMap.has(groupId)) {
+      groupsMap.set(groupId, {
+        id: groupId,
+        members: [],
+        teacherName: row.teacherName?.trim() || "",
+        notes: row.groupNotes?.trim() || "",
+        demographics: {
+          avgAge: 0,
+          avgExperience: 0,
+          bipocCount: 0,
+          lgbtqiaCount: 0,
+          genderDistribution: {},
+        },
+      });
+    }
+
+    groupsMap.get(groupId)!.members.push(member);
+  });
+
+  // Calculate demographics for each group
+  const groups = Array.from(groupsMap.values());
+  groups.forEach((group) => {
+    const members = group.members;
+    group.demographics = {
+      avgAge: Math.round(
+        members.reduce((sum, m) => sum + m.age, 0) / members.length
+      ),
+      avgExperience: Math.round(
+        members.reduce((sum, m) => sum + m.experienceDays, 0) / members.length
+      ),
+      bipocCount: members.filter((m) => m.bipoc).length,
+      lgbtqiaCount: members.filter((m) => m.lgbtqia).length,
+      genderDistribution: members.reduce((acc, m) => {
+        acc[m.gender] = (acc[m.gender] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>),
+    };
+  });
+
+  return groups;
+}
+
 export function exportGroupsToCSV(groups: import("@/types").Group[]): void {
   if (groups.length === 0) return;
 

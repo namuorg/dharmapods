@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import ReactECharts from "echarts-for-react";
 
 import { Attendee, Group, DEFAULT_GROUP_SIZE } from "@/types";
-import { parseCSV, exportGroupsToCSV } from "@/utils/csv";
+import { parseCSV, exportGroupsToCSV, parseGroupsCSV } from "@/utils/csv";
 import { distributeIntoGroups, calculateGroupDemographics } from "@/utils/group-distribution";
 import { getAgeDistributionChartOptions } from "@/utils/charts/age-chart";
 import { getExperienceDistributionChartOptions } from "@/utils/charts/experience-chart";
@@ -146,6 +146,22 @@ export default function Home() {
     exportGroupsToCSV(groups);
   };
 
+  const handleImportGroups = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const csvText = e.target?.result as string;
+        const importedGroups = parseGroupsCSV(csvText);
+        setGroups(importedGroups);
+        // Also set attendees based on imported groups
+        const allAttendees = importedGroups.flatMap(group => group.members);
+        setAttendees(allAttendees);
+      };
+      reader.readAsText(file);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-7xl mx-auto">
@@ -236,13 +252,29 @@ export default function Home() {
                   className="w-16"
                 />
               </div>
-              <Button
-                onClick={handleDistributeGroups}
-                className="w-full mb-4"
-                disabled={attendees.length === 0}
-              >
-                Distribute into Groups
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-2 mb-4">
+                <Button
+                  onClick={handleDistributeGroups}
+                  className="w-full sm:flex-[2]"
+                  disabled={attendees.length === 0}
+                >
+                  Distribute into Groups
+                </Button>
+                <div className="relative w-full sm:flex-1">
+                  <input
+                    type="file"
+                    accept=".csv"
+                    onChange={handleImportGroups}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    id="groups-import"
+                  />
+                  <Button asChild variant="outline" className="bg-white w-full">
+                    <label htmlFor="groups-import" className="cursor-pointer">
+                      Import Groups
+                    </label>
+                  </Button>
+                </div>
+              </div>
 
               <div className="border-t pt-4">
                 <h4 className="font-medium text-foreground mb-2">

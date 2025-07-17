@@ -22,6 +22,7 @@ import {
 const DEFAULT_GROUP_SIZE = 8;
 
 interface Attendee {
+  id: string;
   name: string;
   age: number;
   gender: string;
@@ -49,7 +50,8 @@ function parseCSV(csvText: string): Attendee[] {
     transformHeader: (header) => header.trim(),
   });
 
-  return result.data.map((row) => ({
+  return result.data.map((row, index) => ({
+    id: `attendee-${Date.now()}-${index}`,
     name: row.name?.trim() || "",
     age: parseInt(row.age) || 0,
     gender: row.gender?.trim() || "",
@@ -239,7 +241,7 @@ export default function Home() {
   const [groupSize, setGroupSize] = useState(DEFAULT_GROUP_SIZE);
 
   const moveMemberBetweenGroups = (
-    memberName: string,
+    memberId: string,
     sourceGroupId: number,
     targetGroupId: number
   ) => {
@@ -252,7 +254,7 @@ export default function Home() {
 
       if (!sourceGroup || !targetGroup) return prevGroups;
 
-      const memberIndex = sourceGroup.members.findIndex(m => m.name === memberName);
+      const memberIndex = sourceGroup.members.findIndex(m => m.id === memberId);
       if (memberIndex === -1) return prevGroups;
 
       const memberToMove = sourceGroup.members[memberIndex];
@@ -283,9 +285,9 @@ export default function Home() {
 
       return draggable({
         element,
-        getInitialData: () => ({ memberName: member.name, groupId }),
+        getInitialData: () => ({ memberId: member.id, groupId }),
       });
-    }, [member.name, groupId]);
+    }, [member.id, groupId]);
 
     return (
       <div
@@ -321,8 +323,8 @@ export default function Home() {
         onDragLeave: () => setIsDraggedOver(false),
         onDrop: ({ source }) => {
           setIsDraggedOver(false);
-          const data = source.data as { memberName: string; groupId: number };
-          moveMemberBetweenGroups(data.memberName, data.groupId, group.id);
+          const data = source.data as { memberId: string; groupId: number };
+          moveMemberBetweenGroups(data.memberId, data.groupId, group.id);
         },
       });
     }, [group.id]);
@@ -345,7 +347,7 @@ export default function Home() {
             >
               {group.members.map((member, index) => (
                 <DraggableMember
-                  key={`${group.id}-${index}-${member.name}`}
+                  key={member.id}
                   member={member}
                   memberIndex={index}
                   groupId={group.id}

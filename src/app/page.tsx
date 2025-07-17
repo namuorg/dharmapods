@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Papa from "papaparse";
+import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -286,7 +287,16 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-foreground mb-8">DharmaPods</h1>
+        <div className="flex flex-col items-center gap-4 mb-8">
+          <Image
+            src="/logo.png"
+            alt="DharmaPods Logo"
+            width={200}
+            height={200}
+            className="rounded-lg"
+          />
+          <h1 className="text-3xl font-bold text-foreground">DharmaPods</h1>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           <Card>

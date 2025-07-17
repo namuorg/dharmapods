@@ -29,6 +29,7 @@ export function exportGroupsToCSV(groups: import("@/types").Group[]): void {
   const csvData = groups.flatMap((group) =>
     group.members.map((member) => ({
       groupId: group.id,
+      teacherName: group.teacherName || "",
       name: member.name,
       age: member.age,
       gender: member.gender,

@@ -29,6 +29,14 @@ export default function Home() {
   const [showAgeChart, setShowAgeChart] = useState(false);
   const [showExperienceChart, setShowExperienceChart] = useState(false);
 
+  const handleTeacherNameChange = (groupId: number, teacherName: string) => {
+    setGroups((prevGroups) => 
+      prevGroups.map((group) => 
+        group.id === groupId ? { ...group, teacherName } : group
+      )
+    );
+  };
+
   const moveMemberBetweenGroups = (
     memberId: string,
     sourceGroupId: number,
@@ -394,7 +402,12 @@ export default function Home() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {groups.map((group) => (
-                <GroupCard key={group.id} group={group} moveMemberBetweenGroups={moveMemberBetweenGroups} />
+                <GroupCard 
+                  key={group.id} 
+                  group={group} 
+                  moveMemberBetweenGroups={moveMemberBetweenGroups} 
+                  onTeacherNameChange={handleTeacherNameChange}
+                />
               ))}
             </div>
           </div>

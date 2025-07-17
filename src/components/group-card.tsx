@@ -7,6 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { DraggableMember } from "./draggable-member";
 import { EmptyDropZone } from "./empty-drop-zone";
 import { Group } from "@/types";
@@ -19,13 +20,22 @@ interface GroupCardProps {
     targetGroupId: number,
     targetIndex?: number
   ) => void;
+  onTeacherNameChange: (groupId: number, teacherName: string) => void;
 }
 
-export function GroupCard({ group, moveMemberBetweenGroups }: GroupCardProps) {
+export function GroupCard({ group, moveMemberBetweenGroups, onTeacherNameChange }: GroupCardProps) {
   return (
     <Card>
       <CardHeader>
         <CardTitle>Group {group.id}</CardTitle>
+        <div className="mt-2">
+          <Input 
+            placeholder="Teacher name"
+            value={group.teacherName || ""}
+            onChange={(e) => onTeacherNameChange(group.id, e.target.value)}
+            className="text-sm"
+          />
+        </div>
       </CardHeader>
       <CardContent>
         <div className="mb-4">

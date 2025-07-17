@@ -597,6 +597,36 @@ export default function Home() {
     }
   };
 
+  const handleExportGroups = () => {
+    if (groups.length === 0) return;
+
+    const csvData = groups.flatMap((group) =>
+      group.members.map((member) => ({
+        groupId: group.id,
+        name: member.name,
+        age: member.age,
+        gender: member.gender,
+        isBIPOC: member.bipoc,
+        isLGBTQIA: member.lgbtqia,
+        experienceDays: member.experienceDays,
+      }))
+    );
+
+    const csv = Papa.unparse(csvData);
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    
+    const timestamp = new Date().toISOString().split('T')[0];
+    a.download = `dharmapods-groups-${timestamp}.csv`;
+    
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  };
+
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-7xl mx-auto">
@@ -694,11 +724,15 @@ export default function Home() {
               >
                 Distribute into Groups
               </Button>
-              
+
               <div className="border-t pt-4">
-                <h4 className="font-medium text-foreground mb-2">Distribution Goals</h4>
+                <h4 className="font-medium text-foreground mb-2">
+                  Distribution Goals
+                </h4>
                 <div className="text-sm text-muted-foreground space-y-1">
-                  <div>• Ensure no group has only 1 BIPOC or LGBTQIA member</div>
+                  <div>
+                    • Ensure no group has only 1 BIPOC or LGBTQIA member
+                  </div>
                   <div>• Create balanced representation across all groups</div>
                   <div>• Maintain similar group sizes</div>
                   <div>• Support inclusive group dynamics</div>
@@ -712,7 +746,12 @@ export default function Home() {
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Distribution Summary</CardTitle>
+                <div className="flex justify-between items-center">
+                  <CardTitle>Distribution Summary</CardTitle>
+                  <Button onClick={handleExportGroups} variant="default">
+                    Export Groups CSV
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

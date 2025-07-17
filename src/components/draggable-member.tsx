@@ -127,7 +127,15 @@ export function DraggableMember({
       )}
       <div
         ref={ref}
-        className="text-sm text-muted-foreground cursor-move hover:bg-muted p-2 rounded transition-colors"
+        className={`text-sm text-muted-foreground cursor-move p-2 rounded transition-colors ${
+          member.gender.toLowerCase() === "female" || member.gender.toLowerCase() === "f"
+            ? "bg-pink-50 hover:bg-pink-100"
+            : member.gender.toLowerCase() === "male" || member.gender.toLowerCase() === "m"
+            ? "bg-blue-50 hover:bg-blue-100"
+            : member.gender.toLowerCase() === "non-binary" || member.gender.toLowerCase() === "nb"
+            ? "bg-yellow-50 hover:bg-yellow-100"
+            : "hover:bg-muted"
+        }`}
       >
         {member.name} ({member.age}, {member.gender})
         {member.bipoc && (

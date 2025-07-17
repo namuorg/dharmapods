@@ -14,13 +14,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { 
-  draggable, 
-  dropTargetForElements 
+import {
+  draggable,
+  dropTargetForElements,
 } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
-import { 
-  attachClosestEdge, 
-  extractClosestEdge 
+import {
+  attachClosestEdge,
+  extractClosestEdge,
 } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
 // import DropIndicator from "@atlaskit/pragmatic-drag-and-drop-react-drop-indicator";
 
@@ -251,48 +251,55 @@ export default function Home() {
     targetGroupId: number,
     targetIndex?: number
   ) => {
-    setGroups(prevGroups => {
+    setGroups((prevGroups) => {
       const newGroups = [...prevGroups];
-      const sourceGroup = newGroups.find(g => g.id === sourceGroupId);
-      const targetGroup = newGroups.find(g => g.id === targetGroupId);
+      const sourceGroup = newGroups.find((g) => g.id === sourceGroupId);
+      const targetGroup = newGroups.find((g) => g.id === targetGroupId);
 
       if (!sourceGroup || !targetGroup) return prevGroups;
 
-      const memberIndex = sourceGroup.members.findIndex(m => m.id === memberId);
+      const memberIndex = sourceGroup.members.findIndex(
+        (m) => m.id === memberId
+      );
       if (memberIndex === -1) return prevGroups;
 
       const memberToMove = sourceGroup.members[memberIndex];
-      
+
       // Remove from source
       sourceGroup.members.splice(memberIndex, 1);
-      
+
       // Add to target at specific position
       if (targetIndex !== undefined) {
         // If moving within the same group, adjust index if needed
-        const adjustedIndex = sourceGroupId === targetGroupId && targetIndex > memberIndex 
-          ? targetIndex - 1 
-          : targetIndex;
+        const adjustedIndex =
+          sourceGroupId === targetGroupId && targetIndex > memberIndex
+            ? targetIndex - 1
+            : targetIndex;
         targetGroup.members.splice(adjustedIndex, 0, memberToMove);
       } else {
         // Default behavior: add to end
         targetGroup.members.push(memberToMove);
       }
 
-      sourceGroup.demographics = calculateGroupDemographics(sourceGroup.members);
-      targetGroup.demographics = calculateGroupDemographics(targetGroup.members);
+      sourceGroup.demographics = calculateGroupDemographics(
+        sourceGroup.members
+      );
+      targetGroup.demographics = calculateGroupDemographics(
+        targetGroup.members
+      );
 
       return newGroups;
     });
   };
 
-  const DraggableMember = ({ 
-    member, 
-    memberIndex, 
-    groupId 
-  }: { 
-    member: Attendee; 
-    memberIndex: number; 
-    groupId: number; 
+  const DraggableMember = ({
+    member,
+    memberIndex,
+    groupId,
+  }: {
+    member: Attendee;
+    memberIndex: number;
+    groupId: number;
   }) => {
     const ref = useRef<HTMLDivElement>(null);
     const [isDraggedOver, setIsDraggedOver] = useState(false);
@@ -308,10 +315,10 @@ export default function Home() {
       cleanup.push(
         draggable({
           element,
-          getInitialData: () => ({ 
-            memberId: member.id, 
+          getInitialData: () => ({
+            memberId: member.id,
             groupId,
-            memberIndex 
+            memberIndex,
           }),
         })
       );
@@ -320,10 +327,10 @@ export default function Home() {
       cleanup.push(
         dropTargetForElements({
           element,
-          getData: () => ({ 
-            memberId: member.id, 
+          getData: () => ({
+            memberId: member.id,
             groupId,
-            memberIndex 
+            memberIndex,
           }),
           canDrop: ({ source }) => {
             // Don't allow dropping on self
@@ -338,24 +345,24 @@ export default function Home() {
           onDrop: ({ source, self }) => {
             setIsDraggedOver(false);
             setClosestEdge(null);
-            
-            const sourceData = source.data as { 
-              memberId: string; 
-              groupId: number; 
+
+            const sourceData = source.data as {
+              memberId: string;
+              groupId: number;
               memberIndex: number;
             };
-            
+
             const edge = extractClosestEdge(self.data);
             let targetIndex = memberIndex;
-            
-            if (edge === 'bottom') {
+
+            if (edge === "bottom") {
               targetIndex = memberIndex + 1;
             }
-            
+
             moveMemberBetweenGroups(
-              sourceData.memberId, 
-              sourceData.groupId, 
-              groupId, 
+              sourceData.memberId,
+              sourceData.groupId,
+              groupId,
               targetIndex
             );
           },
@@ -364,7 +371,7 @@ export default function Home() {
         })
       );
 
-      return () => cleanup.forEach(fn => fn());
+      return () => cleanup.forEach((fn) => fn());
     }, [member.id, groupId, memberIndex]);
 
     useEffect(() => {
@@ -376,18 +383,18 @@ export default function Home() {
       const handleDragMove = (event: DragEvent) => {
         const rect = element.getBoundingClientRect();
         const midpoint = rect.top + rect.height / 2;
-        const edge = event.clientY <= midpoint ? 'top' : 'bottom';
+        const edge = event.clientY <= midpoint ? "top" : "bottom";
         setClosestEdge(edge);
       };
 
-      document.addEventListener('dragover', handleDragMove);
-      return () => document.removeEventListener('dragover', handleDragMove);
+      document.addEventListener("dragover", handleDragMove);
+      return () => document.removeEventListener("dragover", handleDragMove);
     }, [isDraggedOver]);
 
     return (
       <div className="relative">
-        {isDraggedOver && closestEdge === 'top' && (
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-blue-500 z-10" />
+        {isDraggedOver && closestEdge === "top" && (
+          <div className="absolute left-0 right-0 h-0.5 bg-blue-500 z-10" />
         )}
         <div
           ref={ref}
@@ -405,8 +412,8 @@ export default function Home() {
             </Badge>
           )}
         </div>
-        {isDraggedOver && closestEdge === 'bottom' && (
-          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 z-10" />
+        {isDraggedOver && closestEdge === "bottom" && (
+          <div className="absolute left-0 right-0 h-0.5 bg-blue-500 z-10" />
         )}
       </div>
     );
@@ -436,7 +443,9 @@ export default function Home() {
       <div
         ref={ref}
         className={`text-center py-4 transition-colors duration-200 ${
-          isDraggedOver ? 'text-blue-600 font-medium bg-blue-50' : 'text-muted-foreground'
+          isDraggedOver
+            ? "text-blue-600 font-medium bg-blue-50"
+            : "text-muted-foreground"
         }`}
       >
         Drop members here
@@ -455,7 +464,7 @@ export default function Home() {
             <h4 className="font-medium text-foreground mb-2">
               Members ({group.members.length})
             </h4>
-            <div className="space-y-1 min-h-[100px] border-2 border-dashed border-gray-200 rounded p-2">
+            <div className="min-h-[100px] border-2 border-dashed border-gray-200 rounded p-2">
               {group.members.map((member, index) => (
                 <DraggableMember
                   key={member.id}
@@ -470,55 +479,43 @@ export default function Home() {
             </div>
           </div>
 
-            <div className="border-t pt-4">
-              <h4 className="font-medium text-foreground mb-2">
-                Demographics
-              </h4>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="text-muted-foreground">
-                    Avg Age:
-                  </span>{" "}
-                  {group.demographics.avgAge}
-                </div>
-                <div>
-                  <span className="text-muted-foreground">
-                    Avg Experience:
-                  </span>{" "}
-                  {group.demographics.avgExperience} days
-                </div>
-                <div>
-                  <span className="text-muted-foreground">BIPOC:</span>{" "}
-                  {group.demographics.bipocCount}
-                </div>
-                <div>
-                  <span className="text-muted-foreground">
-                    LGBTQIA:
-                  </span>{" "}
-                  {group.demographics.lgbtqiaCount}
-                </div>
+          <div className="border-t pt-4">
+            <h4 className="font-medium text-foreground mb-2">Demographics</h4>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div>
+                <span className="text-muted-foreground">Avg Age:</span>{" "}
+                {group.demographics.avgAge}
               </div>
-              <div className="mt-2">
-                <span className="text-muted-foreground text-sm">
-                  Gender Distribution:
-                </span>
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {Object.entries(
-                    group.demographics.genderDistribution
-                  ).map(([gender, count]) => (
-                    <Badge
-                      key={gender}
-                      variant="outline"
-                      className="text-xs"
-                    >
-                      {gender}: {count}
-                    </Badge>
-                  ))}
-                </div>
+              <div>
+                <span className="text-muted-foreground">Avg Experience:</span>{" "}
+                {group.demographics.avgExperience} days
+              </div>
+              <div>
+                <span className="text-muted-foreground">BIPOC:</span>{" "}
+                {group.demographics.bipocCount}
+              </div>
+              <div>
+                <span className="text-muted-foreground">LGBTQIA:</span>{" "}
+                {group.demographics.lgbtqiaCount}
               </div>
             </div>
-          </CardContent>
-        </Card>
+            <div className="mt-2">
+              <span className="text-muted-foreground text-sm">
+                Gender Distribution:
+              </span>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {Object.entries(group.demographics.genderDistribution).map(
+                  ([gender, count]) => (
+                    <Badge key={gender} variant="outline" className="text-xs">
+                      {gender}: {count}
+                    </Badge>
+                  )
+                )}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     );
   };
 

@@ -133,40 +133,28 @@ export const GroupCard = memo(function GroupCard({
               {group.demographics.avgExperience} days
             </div>
             <div>
-              <span
-                className={
-                  group.demographics.bipocCount === 1
-                    ? "text-red-500"
-                    : "text-muted-foreground"
-                }
-              >
-                BIPOC:
-              </span>{" "}
-              <span
-                className={
-                  group.demographics.bipocCount === 1 ? "text-red-500" : ""
-                }
-              >
-                {group.demographics.bipocCount}
-              </span>
+              {group.demographics.bipocCount === 1 ? (
+                <Badge variant="destructive" className="text-xs">
+                  BIPOC: {group.demographics.bipocCount}
+                </Badge>
+              ) : (
+                <>
+                  <span className="text-muted-foreground">BIPOC:</span>{" "}
+                  {group.demographics.bipocCount}
+                </>
+              )}
             </div>
             <div>
-              <span
-                className={
-                  group.demographics.lgbtqiaCount === 1
-                    ? "text-red-500"
-                    : "text-muted-foreground"
-                }
-              >
-                LGBTQIA:
-              </span>{" "}
-              <span
-                className={
-                  group.demographics.lgbtqiaCount === 1 ? "text-red-500" : ""
-                }
-              >
-                {group.demographics.lgbtqiaCount}
-              </span>
+              {group.demographics.lgbtqiaCount === 1 ? (
+                <Badge variant="destructive" className="text-xs">
+                  LGBTQIA: {group.demographics.lgbtqiaCount}
+                </Badge>
+              ) : (
+                <>
+                  <span className="text-muted-foreground">LGBTQIA:</span>{" "}
+                  {group.demographics.lgbtqiaCount}
+                </>
+              )}
             </div>
           </div>
           <div className="mt-2">

@@ -491,12 +491,16 @@ export default function Home() {
                 {group.demographics.avgExperience} days
               </div>
               <div>
-                <span className="text-muted-foreground">BIPOC:</span>{" "}
-                {group.demographics.bipocCount}
+                <span className={group.demographics.bipocCount === 1 ? "text-red-500" : "text-muted-foreground"}>BIPOC:</span>{" "}
+                <span className={group.demographics.bipocCount === 1 ? "text-red-500" : ""}>
+                  {group.demographics.bipocCount}
+                </span>
               </div>
               <div>
-                <span className="text-muted-foreground">LGBTQIA:</span>{" "}
-                {group.demographics.lgbtqiaCount}
+                <span className={group.demographics.lgbtqiaCount === 1 ? "text-red-500" : "text-muted-foreground"}>LGBTQIA:</span>{" "}
+                <span className={group.demographics.lgbtqiaCount === 1 ? "text-red-500" : ""}>
+                  {group.demographics.lgbtqiaCount}
+                </span>
               </div>
             </div>
             <div className="mt-2">

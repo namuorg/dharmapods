@@ -269,6 +269,69 @@ export default function Home() {
               </CardContent>
             </Card>
 
+            <Card>
+              <CardHeader>
+                <CardTitle>Overall Demographics</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="bg-muted p-4 rounded">
+                    <h3 className="font-medium text-muted-foreground">
+                      Avg Age
+                    </h3>
+                    <p className="text-2xl font-bold text-blue-600">
+                      {Math.round(attendees.reduce((sum, a) => sum + a.age, 0) / attendees.length)}
+                    </p>
+                  </div>
+                  <div className="bg-muted p-4 rounded">
+                    <h3 className="font-medium text-muted-foreground">
+                      Avg Experience
+                    </h3>
+                    <p className="text-2xl font-bold text-green-600">
+                      {Math.round(attendees.reduce((sum, a) => sum + a.experienceDays, 0) / attendees.length)} days
+                    </p>
+                  </div>
+                  <div className="bg-muted p-4 rounded">
+                    <h3 className="font-medium text-muted-foreground">
+                      BIPOC
+                    </h3>
+                    <p className="text-2xl font-bold text-purple-600">
+                      {attendees.filter(a => a.bipoc).length} ({Math.round((attendees.filter(a => a.bipoc).length / attendees.length) * 100)}%)
+                    </p>
+                  </div>
+                  <div className="bg-muted p-4 rounded">
+                    <h3 className="font-medium text-muted-foreground">
+                      LGBTQIA
+                    </h3>
+                    <p className="text-2xl font-bold text-orange-600">
+                      {attendees.filter(a => a.lgbtqia).length} ({Math.round((attendees.filter(a => a.lgbtqia).length / attendees.length) * 100)}%)
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <h3 className="font-medium text-muted-foreground mb-2">
+                    Gender Distribution
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(
+                      attendees.reduce((acc, a) => {
+                        acc[a.gender] = (acc[a.gender] || 0) + 1;
+                        return acc;
+                      }, {} as Record<string, number>)
+                    ).map(([gender, count]) => (
+                      <Badge
+                        key={gender}
+                        variant="outline"
+                        className="text-sm"
+                      >
+                        {gender}: {count}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {groups.map((group) => (
                 <Card key={group.id}>

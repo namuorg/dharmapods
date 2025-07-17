@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Papa from "papaparse";
 import Image from "next/image";
 import {
@@ -14,6 +14,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { 
+  draggable, 
+  dropTargetForElements 
+} from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 
 const DEFAULT_GROUP_SIZE = 8;
 
@@ -233,6 +237,181 @@ export default function Home() {
   const [attendees, setAttendees] = useState<Attendee[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [groupSize, setGroupSize] = useState(DEFAULT_GROUP_SIZE);
+
+  const moveMemberBetweenGroups = (
+    memberName: string,
+    sourceGroupId: number,
+    targetGroupId: number
+  ) => {
+    if (sourceGroupId === targetGroupId) return;
+
+    setGroups(prevGroups => {
+      const newGroups = [...prevGroups];
+      const sourceGroup = newGroups.find(g => g.id === sourceGroupId);
+      const targetGroup = newGroups.find(g => g.id === targetGroupId);
+
+      if (!sourceGroup || !targetGroup) return prevGroups;
+
+      const memberIndex = sourceGroup.members.findIndex(m => m.name === memberName);
+      if (memberIndex === -1) return prevGroups;
+
+      const memberToMove = sourceGroup.members[memberIndex];
+      sourceGroup.members.splice(memberIndex, 1);
+      targetGroup.members.push(memberToMove);
+
+      sourceGroup.demographics = calculateGroupDemographics(sourceGroup.members);
+      targetGroup.demographics = calculateGroupDemographics(targetGroup.members);
+
+      return newGroups;
+    });
+  };
+
+  const DraggableMember = ({ 
+    member, 
+    memberIndex, 
+    groupId 
+  }: { 
+    member: Attendee; 
+    memberIndex: number; 
+    groupId: number; 
+  }) => {
+    const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+      const element = ref.current;
+      if (!element) return;
+
+      return draggable({
+        element,
+        getInitialData: () => ({ memberName: member.name, groupId }),
+      });
+    }, [member.name, groupId]);
+
+    return (
+      <div
+        ref={ref}
+        className="text-sm text-muted-foreground cursor-move hover:bg-muted p-2 rounded transition-colors"
+      >
+        {member.name} ({member.age}, {member.gender})
+        {member.bipoc && (
+          <Badge variant="secondary" className="ml-2">
+            BIPOC
+          </Badge>
+        )}
+        {member.lgbtqia && (
+          <Badge variant="outline" className="ml-2">
+            LGBTQIA
+          </Badge>
+        )}
+      </div>
+    );
+  };
+
+  const GroupCard = ({ group }: { group: Group }) => {
+    const ref = useRef<HTMLDivElement>(null);
+    const [isDraggedOver, setIsDraggedOver] = useState(false);
+
+    useEffect(() => {
+      const element = ref.current;
+      if (!element) return;
+
+      return dropTargetForElements({
+        element,
+        onDragEnter: () => setIsDraggedOver(true),
+        onDragLeave: () => setIsDraggedOver(false),
+        onDrop: ({ source }) => {
+          setIsDraggedOver(false);
+          const data = source.data as { memberName: string; groupId: number };
+          moveMemberBetweenGroups(data.memberName, data.groupId, group.id);
+        },
+      });
+    }, [group.id]);
+
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Group {group.id}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="mb-4">
+            <h4 className="font-medium text-foreground mb-2">
+              Members ({group.members.length})
+            </h4>
+            <div 
+              ref={ref}
+              className={`space-y-1 min-h-[100px] border-2 border-dashed rounded p-2 transition-all duration-200 ${
+                isDraggedOver ? 'border-blue-400 bg-blue-50' : 'border-gray-200'
+              }`}
+            >
+              {group.members.map((member, index) => (
+                <DraggableMember
+                  key={`${group.id}-${index}-${member.name}`}
+                  member={member}
+                  memberIndex={index}
+                  groupId={group.id}
+                />
+              ))}
+              {group.members.length === 0 && (
+                <div className={`text-center py-4 transition-colors duration-200 ${
+                  isDraggedOver ? 'text-blue-600 font-medium' : 'text-muted-foreground'
+                }`}>
+                  Drop members here
+                </div>
+              )}
+            </div>
+          </div>
+
+            <div className="border-t pt-4">
+              <h4 className="font-medium text-foreground mb-2">
+                Demographics
+              </h4>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">
+                    Avg Age:
+                  </span>{" "}
+                  {group.demographics.avgAge}
+                </div>
+                <div>
+                  <span className="text-muted-foreground">
+                    Avg Experience:
+                  </span>{" "}
+                  {group.demographics.avgExperience} days
+                </div>
+                <div>
+                  <span className="text-muted-foreground">BIPOC:</span>{" "}
+                  {group.demographics.bipocCount}
+                </div>
+                <div>
+                  <span className="text-muted-foreground">
+                    LGBTQIA:
+                  </span>{" "}
+                  {group.demographics.lgbtqiaCount}
+                </div>
+              </div>
+              <div className="mt-2">
+                <span className="text-muted-foreground text-sm">
+                  Gender Distribution:
+                </span>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {Object.entries(
+                    group.demographics.genderDistribution
+                  ).map(([gender, count]) => (
+                    <Badge
+                      key={gender}
+                      variant="outline"
+                      className="text-xs"
+                    >
+                      {gender}: {count}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+    );
+  };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -501,86 +680,7 @@ export default function Home() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {groups.map((group) => (
-                <Card key={group.id}>
-                  <CardHeader>
-                    <CardTitle>Group {group.id}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="mb-4">
-                      <h4 className="font-medium text-foreground mb-2">
-                        Members ({group.members.length})
-                      </h4>
-                      <div className="space-y-1">
-                        {group.members.map((member, index) => (
-                          <div
-                            key={index}
-                            className="text-sm text-muted-foreground"
-                          >
-                            {member.name} ({member.age}, {member.gender})
-                            {member.bipoc && (
-                              <Badge variant="secondary" className="ml-2">
-                                BIPOC
-                              </Badge>
-                            )}
-                            {member.lgbtqia && (
-                              <Badge variant="outline" className="ml-2">
-                                LGBTQIA
-                              </Badge>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="border-t pt-4">
-                      <h4 className="font-medium text-foreground mb-2">
-                        Demographics
-                      </h4>
-                      <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div>
-                          <span className="text-muted-foreground">
-                            Avg Age:
-                          </span>{" "}
-                          {group.demographics.avgAge}
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">
-                            Avg Experience:
-                          </span>{" "}
-                          {group.demographics.avgExperience} days
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">BIPOC:</span>{" "}
-                          {group.demographics.bipocCount}
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">
-                            LGBTQIA:
-                          </span>{" "}
-                          {group.demographics.lgbtqiaCount}
-                        </div>
-                      </div>
-                      <div className="mt-2">
-                        <span className="text-muted-foreground text-sm">
-                          Gender Distribution:
-                        </span>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {Object.entries(
-                            group.demographics.genderDistribution
-                          ).map(([gender, count]) => (
-                            <Badge
-                              key={gender}
-                              variant="outline"
-                              className="text-xs"
-                            >
-                              {gender}: {count}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <GroupCard key={group.id} group={group} />
               ))}
             </div>
           </div>

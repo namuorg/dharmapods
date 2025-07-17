@@ -266,7 +266,7 @@ export default function Home() {
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-foreground mb-8">
-          Retreat Group Distribution
+          DharmaPods
         </h1>
 
         <Card className="mb-8">

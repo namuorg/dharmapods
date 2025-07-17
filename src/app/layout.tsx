@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Retreat Group Distribution",
+  title: "DharmaPods",
   description: "Dharma retreat group distribution app with BIPOC/LGBTQIA affinity group support",
 };
 

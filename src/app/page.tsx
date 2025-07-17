@@ -178,7 +178,7 @@ export default function Home() {
             className="rounded-lg"
           />
           {groups.length > 0 && (
-            <h1 className="text-3xl font-bold text-foreground">DharmaPods</h1>
+            <h1 className="text-3xl font-bold text-foreground font-[family-name:var(--font-nunito)]">DharmaPods</h1>
           )}
         </div>
 

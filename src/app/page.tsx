@@ -201,11 +201,13 @@ export default function Home() {
                 className="w-16"
               />
             </div>
-            {attendees.length > 0 && (
-              <Button onClick={handleDistributeGroups} className="w-full">
-                Distribute into Groups
-              </Button>
-            )}
+            <Button 
+              onClick={handleDistributeGroups} 
+              className="w-full"
+              disabled={attendees.length === 0}
+            >
+              Distribute into Groups
+            </Button>
           </CardContent>
         </Card>
 

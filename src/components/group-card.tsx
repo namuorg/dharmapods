@@ -113,7 +113,11 @@ function TeacherCombobox({
             onValueChange={setSearchValue}
           />
           <CommandList>
-            <CommandEmpty className="py-0 text-center text-sm">
+            <CommandEmpty
+              className={`${
+                searchValue ? "py-0" : "pt-2 text-muted-foreground"
+              } text-center text-sm`}
+            >
               {searchValue ? (
                 <button
                   className="w-full p-2 text-left hover:bg-accent"

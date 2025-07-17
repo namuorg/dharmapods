@@ -491,14 +491,38 @@ export default function Home() {
                 {group.demographics.avgExperience} days
               </div>
               <div>
-                <span className={group.demographics.bipocCount === 1 ? "text-red-500" : "text-muted-foreground"}>BIPOC:</span>{" "}
-                <span className={group.demographics.bipocCount === 1 ? "text-red-500" : ""}>
+                <span
+                  className={
+                    group.demographics.bipocCount === 1
+                      ? "text-red-500"
+                      : "text-muted-foreground"
+                  }
+                >
+                  BIPOC:
+                </span>{" "}
+                <span
+                  className={
+                    group.demographics.bipocCount === 1 ? "text-red-500" : ""
+                  }
+                >
                   {group.demographics.bipocCount}
                 </span>
               </div>
               <div>
-                <span className={group.demographics.lgbtqiaCount === 1 ? "text-red-500" : "text-muted-foreground"}>LGBTQIA:</span>{" "}
-                <span className={group.demographics.lgbtqiaCount === 1 ? "text-red-500" : ""}>
+                <span
+                  className={
+                    group.demographics.lgbtqiaCount === 1
+                      ? "text-red-500"
+                      : "text-muted-foreground"
+                  }
+                >
+                  LGBTQIA:
+                </span>{" "}
+                <span
+                  className={
+                    group.demographics.lgbtqiaCount === 1 ? "text-red-500" : ""
+                  }
+                >
                   {group.demographics.lgbtqiaCount}
                 </span>
               </div>
@@ -575,7 +599,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background p-8">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <div
           className={`flex gap-4 mb-8 ${
             groups.length > 0 ? "items-center" : "flex-col items-center"
@@ -788,7 +812,7 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {groups.map((group) => (
                 <GroupCard key={group.id} group={group} />
               ))}

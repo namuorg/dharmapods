@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/popover";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Textarea } from "@/components/ui/textarea";
 import { DraggableMember } from "./draggable-member";
 import { EmptyDropZone } from "./empty-drop-zone";
 import { Group } from "@/types";
@@ -123,6 +124,7 @@ interface GroupCardProps {
     targetIndex?: number
   ) => void;
   onTeacherNameChange: (groupId: number, teacherName: string) => void;
+  onNotesChange: (groupId: number, notes: string) => void;
   existingTeacherNames?: string[];
 }
 
@@ -130,6 +132,7 @@ export function GroupCard({
   group,
   moveMemberBetweenGroups,
   onTeacherNameChange,
+  onNotesChange,
   existingTeacherNames = [],
 }: GroupCardProps) {
   return (
@@ -232,6 +235,16 @@ export function GroupCard({
               )}
             </div>
           </div>
+        </div>
+        
+        <div className="border-t pt-4 mt-4">
+          <h4 className="font-medium text-foreground mb-2">Notes</h4>
+          <Textarea
+            placeholder="Add notes about this group..."
+            value={group.notes || ""}
+            onChange={(e) => onNotesChange(group.id, e.target.value)}
+            className="min-h-[80px] resize-none"
+          />
         </div>
       </CardContent>
     </Card>

@@ -21,6 +21,7 @@ export interface Group {
   members: Attendee[];
   demographics: GroupDemographics;
   teacherName?: string;
+  notes?: string;
 }
 
 export const DEFAULT_GROUP_SIZE = 8;

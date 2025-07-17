@@ -30,6 +30,7 @@ export function exportGroupsToCSV(groups: import("@/types").Group[]): void {
     group.members.map((member) => ({
       groupId: group.id,
       teacherName: group.teacherName || "",
+      groupNotes: group.notes || "",
       name: member.name,
       age: member.age,
       gender: member.gender,

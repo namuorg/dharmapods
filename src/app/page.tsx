@@ -37,6 +37,14 @@ export default function Home() {
     );
   };
 
+  const handleNotesChange = (groupId: number, notes: string) => {
+    setGroups((prevGroups) => 
+      prevGroups.map((group) => 
+        group.id === groupId ? { ...group, notes } : group
+      )
+    );
+  };
+
   const moveMemberBetweenGroups = (
     memberId: string,
     sourceGroupId: number,
@@ -413,6 +421,7 @@ export default function Home() {
                     group={group} 
                     moveMemberBetweenGroups={moveMemberBetweenGroups} 
                     onTeacherNameChange={handleTeacherNameChange}
+                    onNotesChange={handleNotesChange}
                     existingTeacherNames={existingTeacherNames}
                   />
                 );

@@ -490,7 +490,7 @@ export default function Home() {
                 {group.demographics.avgAge}
               </div>
               <div>
-                <span className="text-muted-foreground">Avg Experience:</span>{" "}
+                <span className="text-muted-foreground">Avg Retreat Experience:</span>{" "}
                 {group.demographics.avgExperience} days
               </div>
               <div>
@@ -729,7 +729,7 @@ export default function Home() {
 
     return {
       title: {
-        text: "Experience Distribution",
+        text: "Retreat Experience Distribution",
         left: "center",
         textStyle: {
           fontSize: 16,
@@ -797,7 +797,7 @@ export default function Home() {
               <CardTitle>Upload Attendees CSV</CardTitle>
               <CardDescription>
                 CSV should have columns: name, age, gender, isBIPOC, isLGBTQIA,
-                experienceDays
+                experienceDays (retreat experience in days)
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -955,7 +955,7 @@ export default function Home() {
                     onClick={() => setShowExperienceChart(!showExperienceChart)}
                   >
                     <h3 className="font-medium text-muted-foreground">
-                      Avg Experience
+                      Avg Retreat Experience
                     </h3>
                     <p className="text-2xl font-bold text-slate-700">
                       {Math.round(

@@ -22,6 +22,7 @@ import {
   attachClosestEdge,
   extractClosestEdge,
 } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
+import ReactECharts from "echarts-for-react";
 // import DropIndicator from "@atlaskit/pragmatic-drag-and-drop-react-drop-indicator";
 
 const DEFAULT_GROUP_SIZE = 8;
@@ -244,6 +245,7 @@ export default function Home() {
   const [attendees, setAttendees] = useState<Attendee[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [groupSize, setGroupSize] = useState(DEFAULT_GROUP_SIZE);
+  const [showAgeChart, setShowAgeChart] = useState(false);
 
   const moveMemberBetweenGroups = (
     memberId: string,
@@ -627,6 +629,71 @@ export default function Home() {
     document.body.removeChild(a);
   };
 
+  const getAgeDistributionChartOptions = () => {
+    // Create age bins (e.g., 18-25, 26-35, 36-45, etc.)
+    const ageBins: Record<string, number> = {
+      "18-25": 0,
+      "26-35": 0,
+      "36-45": 0,
+      "46-55": 0,
+      "56-65": 0,
+      "66+": 0,
+    };
+
+    // Count attendees in each age bin
+    attendees.forEach((attendee) => {
+      const age = attendee.age;
+      if (age >= 18 && age <= 25) ageBins["18-25"]++;
+      else if (age >= 26 && age <= 35) ageBins["26-35"]++;
+      else if (age >= 36 && age <= 45) ageBins["36-45"]++;
+      else if (age >= 46 && age <= 55) ageBins["46-55"]++;
+      else if (age >= 56 && age <= 65) ageBins["56-65"]++;
+      else if (age >= 66) ageBins["66+"]++;
+    });
+
+    return {
+      title: {
+        text: "Age Distribution",
+        left: "center",
+        textStyle: {
+          fontSize: 16,
+          fontWeight: "bold",
+        },
+      },
+      tooltip: {
+        trigger: "axis",
+        axisPointer: {
+          type: "shadow",
+        },
+      },
+      xAxis: {
+        type: "category",
+        data: Object.keys(ageBins),
+        axisLabel: {
+          interval: 0,
+        },
+      },
+      yAxis: {
+        type: "value",
+        name: "Number of Attendees",
+      },
+      series: [
+        {
+          name: "Attendees",
+          type: "bar",
+          data: Object.values(ageBins),
+          itemStyle: {
+            color: "#3b82f6",
+          },
+          label: {
+            show: true,
+            position: "top",
+          },
+        },
+      ],
+    };
+  };
+
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-7xl mx-auto">
@@ -789,7 +856,10 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="bg-muted p-4 rounded">
+                  <div 
+                    className="bg-muted p-4 rounded cursor-pointer hover:bg-muted/80 transition-colors"
+                    onClick={() => setShowAgeChart(!showAgeChart)}
+                  >
                     <h3 className="font-medium text-muted-foreground">
                       Avg Age
                     </h3>
@@ -798,6 +868,9 @@ export default function Home() {
                         attendees.reduce((sum, a) => sum + a.age, 0) /
                           attendees.length
                       )}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Click to view distribution
                     </p>
                   </div>
                   <div className="bg-muted p-4 rounded">
@@ -858,6 +931,14 @@ export default function Home() {
                     ))}
                   </div>
                 </div>
+                {showAgeChart && (
+                  <div className="mt-6 border-t pt-6">
+                    <ReactECharts 
+                      option={getAgeDistributionChartOptions()} 
+                      style={{ height: '300px' }}
+                    />
+                  </div>
+                )}
               </CardContent>
             </Card>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,60 @@ import { Textarea } from "@/components/ui/textarea";
 import { DraggableMember } from "./draggable-member";
 import { EmptyDropZone } from "./empty-drop-zone";
 import { Group } from "@/types";
+
+interface NotesTextareaProps {
+  value: string | undefined;
+  onChange: (value: string) => void;
+  placeholder?: string;
+}
+
+function NotesTextarea({ value, onChange, placeholder }: NotesTextareaProps) {
+  const [localValue, setLocalValue] = useState(value || "");
+  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
+
+  // Update local value when prop value changes (e.g., from external sources)
+  useEffect(() => {
+    setLocalValue(value || "");
+  }, [value]);
+
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const newValue = e.target.value;
+      setLocalValue(newValue);
+
+      // Clear existing timeout
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      // Set new timeout for debounced update
+      const newTimeoutId = setTimeout(() => {
+        onChange(newValue);
+      }, 500); // 500ms debounce delay
+
+      setTimeoutId(newTimeoutId);
+    },
+    [onChange, timeoutId]
+  );
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [timeoutId]);
+
+  return (
+    <Textarea
+      placeholder={placeholder}
+      value={localValue}
+      onChange={handleChange}
+      className="min-h-[80px] resize-none"
+    />
+  );
+}
 
 interface TeacherComboboxProps {
   value: string | undefined;
@@ -128,7 +182,7 @@ interface GroupCardProps {
   existingTeacherNames?: string[];
 }
 
-export function GroupCard({
+export const GroupCard = memo(function GroupCard({
   group,
   moveMemberBetweenGroups,
   onTeacherNameChange,
@@ -236,17 +290,16 @@ export function GroupCard({
             </div>
           </div>
         </div>
-        
+
         <div className="border-t pt-4 mt-4">
           <h4 className="font-medium text-foreground mb-2">Notes</h4>
-          <Textarea
+          <NotesTextarea
             placeholder="Add notes about this group..."
-            value={group.notes || ""}
-            onChange={(e) => onNotesChange(group.id, e.target.value)}
-            className="min-h-[80px] resize-none"
+            value={group.notes}
+            onChange={(value) => onNotesChange(group.id, value)}
           />
         </div>
       </CardContent>
     </Card>
   );
-}
+});

@@ -18,6 +18,11 @@ import {
   draggable, 
   dropTargetForElements 
 } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import { 
+  attachClosestEdge, 
+  extractClosestEdge 
+} from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
+// import DropIndicator from "@atlaskit/pragmatic-drag-and-drop-react-drop-indicator";
 
 const DEFAULT_GROUP_SIZE = 8;
 
@@ -243,10 +248,9 @@ export default function Home() {
   const moveMemberBetweenGroups = (
     memberId: string,
     sourceGroupId: number,
-    targetGroupId: number
+    targetGroupId: number,
+    targetIndex?: number
   ) => {
-    if (sourceGroupId === targetGroupId) return;
-
     setGroups(prevGroups => {
       const newGroups = [...prevGroups];
       const sourceGroup = newGroups.find(g => g.id === sourceGroupId);
@@ -258,8 +262,21 @@ export default function Home() {
       if (memberIndex === -1) return prevGroups;
 
       const memberToMove = sourceGroup.members[memberIndex];
+      
+      // Remove from source
       sourceGroup.members.splice(memberIndex, 1);
-      targetGroup.members.push(memberToMove);
+      
+      // Add to target at specific position
+      if (targetIndex !== undefined) {
+        // If moving within the same group, adjust index if needed
+        const adjustedIndex = sourceGroupId === targetGroupId && targetIndex > memberIndex 
+          ? targetIndex - 1 
+          : targetIndex;
+        targetGroup.members.splice(adjustedIndex, 0, memberToMove);
+      } else {
+        // Default behavior: add to end
+        targetGroup.members.push(memberToMove);
+      }
 
       sourceGroup.demographics = calculateGroupDemographics(sourceGroup.members);
       targetGroup.demographics = calculateGroupDemographics(targetGroup.members);
@@ -278,38 +295,124 @@ export default function Home() {
     groupId: number; 
   }) => {
     const ref = useRef<HTMLDivElement>(null);
+    const [isDraggedOver, setIsDraggedOver] = useState(false);
+    const [closestEdge, setClosestEdge] = useState<string | null>(null);
 
     useEffect(() => {
       const element = ref.current;
       if (!element) return;
 
-      return draggable({
-        element,
-        getInitialData: () => ({ memberId: member.id, groupId }),
-      });
-    }, [member.id, groupId]);
+      const cleanup: (() => void)[] = [];
+
+      // Make element draggable
+      cleanup.push(
+        draggable({
+          element,
+          getInitialData: () => ({ 
+            memberId: member.id, 
+            groupId,
+            memberIndex 
+          }),
+        })
+      );
+
+      // Make element a drop target
+      cleanup.push(
+        dropTargetForElements({
+          element,
+          getData: () => ({ 
+            memberId: member.id, 
+            groupId,
+            memberIndex 
+          }),
+          canDrop: ({ source }) => {
+            // Don't allow dropping on self
+            const sourceData = source.data as { memberId: string };
+            return sourceData.memberId !== member.id;
+          },
+          onDragEnter: () => setIsDraggedOver(true),
+          onDragLeave: () => {
+            setIsDraggedOver(false);
+            setClosestEdge(null);
+          },
+          onDrop: ({ source, self }) => {
+            setIsDraggedOver(false);
+            setClosestEdge(null);
+            
+            const sourceData = source.data as { 
+              memberId: string; 
+              groupId: number; 
+              memberIndex: number;
+            };
+            
+            const edge = extractClosestEdge(self.data);
+            let targetIndex = memberIndex;
+            
+            if (edge === 'bottom') {
+              targetIndex = memberIndex + 1;
+            }
+            
+            moveMemberBetweenGroups(
+              sourceData.memberId, 
+              sourceData.groupId, 
+              groupId, 
+              targetIndex
+            );
+          },
+          getIsSticky: () => true,
+          ...attachClosestEdge,
+        })
+      );
+
+      return () => cleanup.forEach(fn => fn());
+    }, [member.id, groupId, memberIndex]);
+
+    useEffect(() => {
+      if (!isDraggedOver) return;
+
+      const element = ref.current;
+      if (!element) return;
+
+      const handleDragMove = (event: DragEvent) => {
+        const rect = element.getBoundingClientRect();
+        const midpoint = rect.top + rect.height / 2;
+        const edge = event.clientY <= midpoint ? 'top' : 'bottom';
+        setClosestEdge(edge);
+      };
+
+      document.addEventListener('dragover', handleDragMove);
+      return () => document.removeEventListener('dragover', handleDragMove);
+    }, [isDraggedOver]);
 
     return (
-      <div
-        ref={ref}
-        className="text-sm text-muted-foreground cursor-move hover:bg-muted p-2 rounded transition-colors"
-      >
-        {member.name} ({member.age}, {member.gender})
-        {member.bipoc && (
-          <Badge variant="secondary" className="ml-2">
-            BIPOC
-          </Badge>
+      <div className="relative">
+        {isDraggedOver && closestEdge === 'top' && (
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-blue-500 z-10" />
         )}
-        {member.lgbtqia && (
-          <Badge variant="outline" className="ml-2">
-            LGBTQIA
-          </Badge>
+        <div
+          ref={ref}
+          className="text-sm text-muted-foreground cursor-move hover:bg-muted p-2 rounded transition-colors"
+        >
+          {member.name} ({member.age}, {member.gender})
+          {member.bipoc && (
+            <Badge variant="secondary" className="ml-2">
+              BIPOC
+            </Badge>
+          )}
+          {member.lgbtqia && (
+            <Badge variant="outline" className="ml-2">
+              LGBTQIA
+            </Badge>
+          )}
+        </div>
+        {isDraggedOver && closestEdge === 'bottom' && (
+          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 z-10" />
         )}
       </div>
     );
   };
 
-  const GroupCard = ({ group }: { group: Group }) => {
+  const EmptyDropZone = ({ groupId }: { groupId: number }) => {
     const ref = useRef<HTMLDivElement>(null);
     const [isDraggedOver, setIsDraggedOver] = useState(false);
 
@@ -324,11 +427,24 @@ export default function Home() {
         onDrop: ({ source }) => {
           setIsDraggedOver(false);
           const data = source.data as { memberId: string; groupId: number };
-          moveMemberBetweenGroups(data.memberId, data.groupId, group.id);
+          moveMemberBetweenGroups(data.memberId, data.groupId, groupId);
         },
       });
-    }, [group.id]);
+    }, [groupId]);
 
+    return (
+      <div
+        ref={ref}
+        className={`text-center py-4 transition-colors duration-200 ${
+          isDraggedOver ? 'text-blue-600 font-medium bg-blue-50' : 'text-muted-foreground'
+        }`}
+      >
+        Drop members here
+      </div>
+    );
+  };
+
+  const GroupCard = ({ group }: { group: Group }) => {
     return (
       <Card>
         <CardHeader>
@@ -339,12 +455,7 @@ export default function Home() {
             <h4 className="font-medium text-foreground mb-2">
               Members ({group.members.length})
             </h4>
-            <div 
-              ref={ref}
-              className={`space-y-1 min-h-[100px] border-2 border-dashed rounded p-2 transition-all duration-200 ${
-                isDraggedOver ? 'border-blue-400 bg-blue-50' : 'border-gray-200'
-              }`}
-            >
+            <div className="space-y-1 min-h-[100px] border-2 border-dashed border-gray-200 rounded p-2">
               {group.members.map((member, index) => (
                 <DraggableMember
                   key={member.id}
@@ -354,11 +465,7 @@ export default function Home() {
                 />
               ))}
               {group.members.length === 0 && (
-                <div className={`text-center py-4 transition-colors duration-200 ${
-                  isDraggedOver ? 'text-blue-600 font-medium' : 'text-muted-foreground'
-                }`}>
-                  Drop members here
-                </div>
+                <EmptyDropZone groupId={group.id} />
               )}
             </div>
           </div>

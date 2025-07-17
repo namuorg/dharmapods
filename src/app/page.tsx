@@ -50,10 +50,10 @@ function parseCSV(csvText: string): Attendee[] {
     age: parseInt(row.age) || 0,
     gender: row.gender?.trim() || "",
     bipoc:
-      row.bipoc?.toLowerCase() === "true" || row.bipoc?.toLowerCase() === "yes",
+      row.isBIPOC?.toLowerCase() === "true" || row.isBIPOC?.toLowerCase() === "yes",
     lgbtqia:
-      row.lgbtqia?.toLowerCase() === "true" ||
-      row.lgbtqia?.toLowerCase() === "yes",
+      row.isLGBTQIA?.toLowerCase() === "true" ||
+      row.isLGBTQIA?.toLowerCase() === "yes",
     experienceDays: parseInt(row.experienceDays) || 0,
   }));
 }
@@ -273,7 +273,7 @@ export default function Home() {
           <CardHeader>
             <CardTitle>Upload Attendees CSV</CardTitle>
             <CardDescription>
-              CSV should have columns: name, age, gender, bipoc, lgbtqia,
+              CSV should have columns: name, age, gender, isBIPOC, isLGBTQIA,
               experienceDays
             </CardDescription>
           </CardHeader>

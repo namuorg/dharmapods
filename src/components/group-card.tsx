@@ -23,6 +23,97 @@ import { DraggableMember } from "./draggable-member";
 import { EmptyDropZone } from "./empty-drop-zone";
 import { Group } from "@/types";
 
+interface TeacherComboboxProps {
+  value: string | undefined;
+  onChange: (value: string) => void;
+  existingTeacherNames: string[];
+}
+
+function TeacherCombobox({
+  value,
+  onChange,
+  existingTeacherNames,
+}: TeacherComboboxProps) {
+  const [open, setOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between text-sm font-normal bg-white"
+        >
+          {value || "Select teacher..."}
+          <ChevronsUpDown className="opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-full p-0">
+        <Command>
+          <CommandInput
+            placeholder="Search teacher..."
+            value={searchValue}
+            onValueChange={setSearchValue}
+          />
+          <CommandList>
+            <CommandEmpty className="py-0 text-center text-sm">
+              {searchValue ? (
+                <button
+                  className="w-full p-2 text-left hover:bg-accent"
+                  onClick={() => {
+                    onChange(searchValue);
+                    setOpen(false);
+                    setSearchValue("");
+                  }}
+                >
+                  Add &quot;{searchValue}&quot; as new teacher
+                </button>
+              ) : (
+                "No teacher found."
+              )}
+            </CommandEmpty>
+            <CommandGroup>
+              {value && (
+                <CommandItem
+                  value="clear"
+                  onSelect={() => {
+                    onChange("");
+                    setOpen(false);
+                    setSearchValue("");
+                  }}
+                >
+                  <span className="text-muted-foreground">Clear selection</span>
+                </CommandItem>
+              )}
+              {existingTeacherNames.map((name) => (
+                <CommandItem
+                  key={name}
+                  value={name}
+                  onSelect={() => {
+                    onChange(name);
+                    setOpen(false);
+                    setSearchValue("");
+                  }}
+                >
+                  {name}
+                  <Check
+                    className={cn(
+                      "ml-auto",
+                      value === name ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 interface GroupCardProps {
   group: Group;
   moveMemberBetweenGroups: (
@@ -41,91 +132,16 @@ export function GroupCard({
   onTeacherNameChange,
   existingTeacherNames = [],
 }: GroupCardProps) {
-  const [open, setOpen] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
-
   return (
     <Card>
       <CardHeader>
         <CardTitle>Group {group.id}</CardTitle>
         <div className="mt-2">
-          <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={open}
-                className="w-full justify-between text-sm font-normal bg-white"
-              >
-                {group.teacherName || "Select teacher..."}
-                <ChevronsUpDown className="opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-full p-0">
-              <Command>
-                <CommandInput
-                  placeholder="Search teacher..."
-                  value={searchValue}
-                  onValueChange={setSearchValue}
-                />
-                <CommandList>
-                  <CommandEmpty>
-                    {searchValue ? (
-                      <button
-                        className="w-full p-2 text-left hover:bg-accent"
-                        onClick={() => {
-                          onTeacherNameChange(group.id, searchValue);
-                          setOpen(false);
-                          setSearchValue("");
-                        }}
-                      >
-                        Add &quot;{searchValue}&quot; as new teacher
-                      </button>
-                    ) : (
-                      "No teacher found."
-                    )}
-                  </CommandEmpty>
-                  <CommandGroup>
-                    {group.teacherName && (
-                      <CommandItem
-                        value="clear"
-                        onSelect={() => {
-                          onTeacherNameChange(group.id, "");
-                          setOpen(false);
-                          setSearchValue("");
-                        }}
-                      >
-                        <span className="text-muted-foreground">
-                          Clear selection
-                        </span>
-                      </CommandItem>
-                    )}
-                    {existingTeacherNames.map((name) => (
-                      <CommandItem
-                        key={name}
-                        value={name}
-                        onSelect={() => {
-                          onTeacherNameChange(group.id, name);
-                          setOpen(false);
-                          setSearchValue("");
-                        }}
-                      >
-                        {name}
-                        <Check
-                          className={cn(
-                            "ml-auto",
-                            group.teacherName === name
-                              ? "opacity-100"
-                              : "opacity-0"
-                          )}
-                        />
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
+          <TeacherCombobox
+            value={group.teacherName}
+            onChange={(value) => onTeacherNameChange(group.id, value)}
+            existingTeacherNames={existingTeacherNames}
+          />
         </div>
       </CardHeader>
       <CardContent>

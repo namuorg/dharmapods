@@ -127,9 +127,7 @@ export const GroupCard = memo(function GroupCard({
               {group.demographics.avgAge}
             </div>
             <div>
-              <span className="text-muted-foreground">
-                Avg Retreat Experience:
-              </span>{" "}
+              <span className="text-muted-foreground">Avg Retreat Exp:</span>{" "}
               {group.demographics.avgExperience} days
             </div>
             <div>

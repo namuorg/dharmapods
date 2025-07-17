@@ -297,8 +297,8 @@ export default function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-4 mb-4">
-              <div className="relative">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-4">
+              <div className="relative w-full sm:w-auto">
                 <input
                   type="file"
                   accept=".csv"
@@ -306,16 +306,24 @@ export default function Home() {
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   id="csv-upload"
                 />
-                <Button asChild>
+                <Button asChild className="w-full sm:w-auto">
                   <label htmlFor="csv-upload" className="cursor-pointer">
                     Upload CSV
                   </label>
                 </Button>
               </div>
-              <Button onClick={handleLoadSampleData} variant="outline">
+              <Button
+                onClick={handleLoadSampleData}
+                variant="outline"
+                className="w-full sm:w-auto"
+              >
                 Use Sample Data
               </Button>
-              <Button onClick={handleDownloadTemplate} variant="outline">
+              <Button
+                onClick={handleDownloadTemplate}
+                variant="outline"
+                className="w-full sm:w-auto bg-muted"
+              >
                 Download Template
               </Button>
             </div>

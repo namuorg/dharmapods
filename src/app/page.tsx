@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 
 const DEFAULT_GROUP_SIZE = 8;
 
+
 interface Attendee {
   name: string;
   age: number;
@@ -149,6 +150,18 @@ export default function Home() {
     }
   };
 
+  const handleLoadSampleData = async () => {
+    try {
+      const response = await fetch('/sample-attendees.csv');
+      const csvText = await response.text();
+      const parsedAttendees = parseCSV(csvText);
+      setAttendees(parsedAttendees);
+      setGroups([]);
+    } catch (error) {
+      console.error('Error loading sample data:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-6xl mx-auto">
@@ -171,13 +184,22 @@ export default function Home() {
               onChange={handleFileUpload}
               className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
             />
-            {attendees.length > 0 && (
-              <div className="mt-4">
-                <p className="text-green-600 font-medium">
-                  {attendees.length} attendees loaded
-                </p>
+            <div className="mt-4 flex items-center justify-between">
+              <div>
+                {attendees.length > 0 && (
+                  <p className="text-green-600 font-medium">
+                    {attendees.length} attendees loaded
+                  </p>
+                )}
               </div>
-            )}
+              <Button 
+                onClick={handleLoadSampleData}
+                variant="outline"
+                size="sm"
+              >
+                Use Sample Data
+              </Button>
+            </div>
           </CardContent>
         </Card>
 

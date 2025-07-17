@@ -21,9 +21,10 @@ interface GroupCardProps {
     targetIndex?: number
   ) => void;
   onTeacherNameChange: (groupId: number, teacherName: string) => void;
+  existingTeacherNames?: string[];
 }
 
-export function GroupCard({ group, moveMemberBetweenGroups, onTeacherNameChange }: GroupCardProps) {
+export function GroupCard({ group, moveMemberBetweenGroups, onTeacherNameChange, existingTeacherNames = [] }: GroupCardProps) {
   return (
     <Card>
       <CardHeader>
@@ -34,7 +35,13 @@ export function GroupCard({ group, moveMemberBetweenGroups, onTeacherNameChange 
             value={group.teacherName || ""}
             onChange={(e) => onTeacherNameChange(group.id, e.target.value)}
             className="text-sm"
+            list={`teacher-list-${group.id}`}
           />
+          <datalist id={`teacher-list-${group.id}`}>
+            {existingTeacherNames.map((name) => (
+              <option key={name} value={name} />
+            ))}
+          </datalist>
         </div>
       </CardHeader>
       <CardContent>

@@ -401,14 +401,22 @@ export default function Home() {
             </Card>
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {groups.map((group) => (
-                <GroupCard 
-                  key={group.id} 
-                  group={group} 
-                  moveMemberBetweenGroups={moveMemberBetweenGroups} 
-                  onTeacherNameChange={handleTeacherNameChange}
-                />
-              ))}
+              {groups.map((group) => {
+                const existingTeacherNames = groups
+                  .filter(g => g.id !== group.id && g.teacherName)
+                  .map(g => g.teacherName!)
+                  .filter((name, index, self) => self.indexOf(name) === index);
+                
+                return (
+                  <GroupCard 
+                    key={group.id} 
+                    group={group} 
+                    moveMemberBetweenGroups={moveMemberBetweenGroups} 
+                    onTeacherNameChange={handleTeacherNameChange}
+                    existingTeacherNames={existingTeacherNames}
+                  />
+                );
+              })}
             </div>
           </div>
         )}

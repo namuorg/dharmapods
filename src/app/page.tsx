@@ -397,7 +397,7 @@ export default function Home() {
                     <h3 className="font-medium text-muted-foreground">
                       Total Groups
                     </h3>
-                    <p className="text-2xl font-bold text-blue-600">
+                    <p className="text-2xl font-bold text-slate-700">
                       {groups.length}
                     </p>
                   </div>
@@ -405,7 +405,7 @@ export default function Home() {
                     <h3 className="font-medium text-muted-foreground">
                       Total Attendees
                     </h3>
-                    <p className="text-2xl font-bold text-green-600">
+                    <p className="text-2xl font-bold text-slate-700">
                       {attendees.length}
                     </p>
                   </div>
@@ -413,7 +413,7 @@ export default function Home() {
                     <h3 className="font-medium text-muted-foreground">
                       Avg Group Size
                     </h3>
-                    <p className="text-2xl font-bold text-purple-600">
+                    <p className="text-2xl font-bold text-slate-700">
                       {Math.round(attendees.length / groups.length)}
                     </p>
                   </div>
@@ -431,7 +431,7 @@ export default function Home() {
                     <h3 className="font-medium text-muted-foreground">
                       Avg Age
                     </h3>
-                    <p className="text-2xl font-bold text-blue-600">
+                    <p className="text-2xl font-bold text-slate-700">
                       {Math.round(
                         attendees.reduce((sum, a) => sum + a.age, 0) /
                           attendees.length
@@ -442,7 +442,7 @@ export default function Home() {
                     <h3 className="font-medium text-muted-foreground">
                       Avg Experience
                     </h3>
-                    <p className="text-2xl font-bold text-green-600">
+                    <p className="text-2xl font-bold text-slate-700">
                       {Math.round(
                         attendees.reduce(
                           (sum, a) => sum + a.experienceDays,
@@ -454,7 +454,7 @@ export default function Home() {
                   </div>
                   <div className="bg-muted p-4 rounded">
                     <h3 className="font-medium text-muted-foreground">BIPOC</h3>
-                    <p className="text-2xl font-bold text-purple-600">
+                    <p className="text-2xl font-bold text-slate-700">
                       {attendees.filter((a) => a.bipoc).length} (
                       {Math.round(
                         (attendees.filter((a) => a.bipoc).length /
@@ -468,7 +468,7 @@ export default function Home() {
                     <h3 className="font-medium text-muted-foreground">
                       LGBTQIA
                     </h3>
-                    <p className="text-2xl font-bold text-orange-600">
+                    <p className="text-2xl font-bold text-slate-700">
                       {attendees.filter((a) => a.lgbtqia).length} (
                       {Math.round(
                         (attendees.filter((a) => a.lgbtqia).length /

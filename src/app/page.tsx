@@ -17,7 +17,10 @@ import ReactECharts from "echarts-for-react";
 
 import { Attendee, Group, DEFAULT_GROUP_SIZE } from "@/types";
 import { parseCSV, exportGroupsToCSV, parseGroupsCSV } from "@/utils/csv";
-import { distributeIntoGroups, calculateGroupDemographics } from "@/utils/group-distribution";
+import {
+  distributeIntoGroups,
+  calculateGroupDemographics,
+} from "@/utils/group-distribution";
 import { getAgeDistributionChartOptions } from "@/utils/charts/age-chart";
 import { getExperienceDistributionChartOptions } from "@/utils/charts/experience-chart";
 import { GroupCard } from "@/components/group-card";
@@ -30,16 +33,16 @@ export default function Home() {
   const [showExperienceChart, setShowExperienceChart] = useState(false);
 
   const handleTeacherNameChange = (groupId: number, teacherName: string) => {
-    setGroups((prevGroups) => 
-      prevGroups.map((group) => 
+    setGroups((prevGroups) =>
+      prevGroups.map((group) =>
         group.id === groupId ? { ...group, teacherName } : group
       )
     );
   };
 
   const handleNotesChange = (groupId: number, notes: string) => {
-    setGroups((prevGroups) => 
-      prevGroups.map((group) => 
+    setGroups((prevGroups) =>
+      prevGroups.map((group) =>
         group.id === groupId ? { ...group, notes } : group
       )
     );
@@ -155,7 +158,7 @@ export default function Home() {
         const importedGroups = parseGroupsCSV(csvText);
         setGroups(importedGroups);
         // Also set attendees based on imported groups
-        const allAttendees = importedGroups.flatMap(group => group.members);
+        const allAttendees = importedGroups.flatMap((group) => group.members);
         setAttendees(allAttendees);
       };
       reader.readAsText(file);
@@ -178,7 +181,9 @@ export default function Home() {
             className="rounded-lg"
           />
           {groups.length > 0 && (
-            <h1 className="text-3xl font-bold text-foreground font-[family-name:var(--font-nunito)]">DharmaPods</h1>
+            <h1 className="text-3xl font-bold text-foreground font-[family-name:var(--font-nunito)]">
+              DharmaPods
+            </h1>
           )}
         </div>
 
@@ -192,7 +197,7 @@ export default function Home() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-4">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-4">
                 <div className="relative w-full sm:w-auto">
                   <input
                     type="file"
@@ -210,7 +215,7 @@ export default function Home() {
                 <Button
                   onClick={handleLoadSampleData}
                   variant="outline"
-                  className="w-full sm:w-auto"
+                  className="w-full sm:w-auto bg-white"
                 >
                   Use Sample Data
                 </Button>
@@ -340,7 +345,7 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div 
+                  <div
                     className="bg-muted p-4 rounded cursor-pointer hover:bg-muted/80 transition-colors"
                     onClick={() => setShowAgeChart(!showAgeChart)}
                   >
@@ -357,7 +362,7 @@ export default function Home() {
                       Click to view distribution
                     </p>
                   </div>
-                  <div 
+                  <div
                     className="bg-muted p-4 rounded cursor-pointer hover:bg-muted/80 transition-colors"
                     onClick={() => setShowExperienceChart(!showExperienceChart)}
                   >
@@ -423,17 +428,17 @@ export default function Home() {
                 </div>
                 {showAgeChart && (
                   <div className="mt-6 border-t pt-6">
-                    <ReactECharts 
-                      option={getAgeDistributionChartOptions(attendees)} 
-                      style={{ height: '300px' }}
+                    <ReactECharts
+                      option={getAgeDistributionChartOptions(attendees)}
+                      style={{ height: "300px" }}
                     />
                   </div>
                 )}
                 {showExperienceChart && (
                   <div className="mt-6 border-t pt-6">
-                    <ReactECharts 
-                      option={getExperienceDistributionChartOptions(attendees)} 
-                      style={{ height: '300px' }}
+                    <ReactECharts
+                      option={getExperienceDistributionChartOptions(attendees)}
+                      style={{ height: "300px" }}
                     />
                   </div>
                 )}
@@ -443,15 +448,15 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {groups.map((group) => {
                 const existingTeacherNames = groups
-                  .filter(g => g.id !== group.id && g.teacherName)
-                  .map(g => g.teacherName!)
+                  .filter((g) => g.id !== group.id && g.teacherName)
+                  .map((g) => g.teacherName!)
                   .filter((name, index, self) => self.indexOf(name) === index);
-                
+
                 return (
-                  <GroupCard 
-                    key={group.id} 
-                    group={group} 
-                    moveMemberBetweenGroups={moveMemberBetweenGroups} 
+                  <GroupCard
+                    key={group.id}
+                    group={group}
+                    moveMemberBetweenGroups={moveMemberBetweenGroups}
                     onTeacherNameChange={handleTeacherNameChange}
                     onNotesChange={handleNotesChange}
                     existingTeacherNames={existingTeacherNames}

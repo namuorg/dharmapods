@@ -288,84 +288,86 @@ export default function Home() {
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-foreground mb-8">DharmaPods</h1>
 
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Upload Attendees CSV</CardTitle>
-            <CardDescription>
-              CSV should have columns: name, age, gender, isBIPOC, isLGBTQIA,
-              experienceDays
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-4">
-              <div className="relative w-full sm:w-auto">
-                <input
-                  type="file"
-                  accept=".csv"
-                  onChange={handleFileUpload}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  id="csv-upload"
-                />
-                <Button asChild className="w-full sm:w-auto">
-                  <label htmlFor="csv-upload" className="cursor-pointer">
-                    Upload CSV
-                  </label>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Upload Attendees CSV</CardTitle>
+              <CardDescription>
+                CSV should have columns: name, age, gender, isBIPOC, isLGBTQIA,
+                experienceDays
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-4">
+                <div className="relative w-full sm:w-auto">
+                  <input
+                    type="file"
+                    accept=".csv"
+                    onChange={handleFileUpload}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    id="csv-upload"
+                  />
+                  <Button asChild className="w-full sm:w-auto">
+                    <label htmlFor="csv-upload" className="cursor-pointer">
+                      Upload CSV
+                    </label>
+                  </Button>
+                </div>
+                <Button
+                  onClick={handleLoadSampleData}
+                  variant="outline"
+                  className="w-full sm:w-auto"
+                >
+                  Use Sample Data
+                </Button>
+                <Button
+                  onClick={handleDownloadTemplate}
+                  variant="outline"
+                  className="w-full sm:w-auto bg-muted"
+                >
+                  Download Template
                 </Button>
               </div>
-              <Button
-                onClick={handleLoadSampleData}
-                variant="outline"
-                className="w-full sm:w-auto"
-              >
-                Use Sample Data
-              </Button>
-              <Button
-                onClick={handleDownloadTemplate}
-                variant="outline"
-                className="w-full sm:w-auto bg-muted"
-              >
-                Download Template
-              </Button>
-            </div>
-            <div>
-              {attendees.length > 0 && (
-                <p className="text-green-600 font-medium">
-                  {attendees.length} attendees loaded
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+              <div>
+                {attendees.length > 0 && (
+                  <p className="text-green-600 font-medium">
+                    {attendees.length} attendees loaded
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Group Configuration</CardTitle>
-            <CardDescription>
-              Configure how attendees should be distributed into groups
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2 mb-4">
-              <Label htmlFor="groupSize" className="text-sm font-medium">
-                Group Size:
-              </Label>
-              <Input
-                id="groupSize"
-                type="number"
-                value={groupSize}
-                onChange={(e) => setGroupSize(parseInt(e.target.value))}
-                className="w-16"
-              />
-            </div>
-            <Button
-              onClick={handleDistributeGroups}
-              className="w-full"
-              disabled={attendees.length === 0}
-            >
-              Distribute into Groups
-            </Button>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Group Configuration</CardTitle>
+              <CardDescription>
+                Configure how attendees should be distributed into groups
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2 mb-4">
+                <Label htmlFor="groupSize" className="text-sm font-medium">
+                  Group Size:
+                </Label>
+                <Input
+                  id="groupSize"
+                  type="number"
+                  value={groupSize}
+                  onChange={(e) => setGroupSize(parseInt(e.target.value))}
+                  className="w-16"
+                />
+              </div>
+              <Button
+                onClick={handleDistributeGroups}
+                className="w-full"
+                disabled={attendees.length === 0}
+              >
+                Distribute into Groups
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
 
         {groups.length > 0 && (
           <div className="space-y-6">

@@ -689,11 +689,21 @@ export default function Home() {
               </div>
               <Button
                 onClick={handleDistributeGroups}
-                className="w-full"
+                className="w-full mb-4"
                 disabled={attendees.length === 0}
               >
                 Distribute into Groups
               </Button>
+              
+              <div className="border-t pt-4">
+                <h4 className="font-medium text-foreground mb-2">Distribution Goals</h4>
+                <div className="text-sm text-muted-foreground space-y-1">
+                  <div>• Ensure no group has only 1 BIPOC or LGBTQIA member</div>
+                  <div>• Create balanced representation across all groups</div>
+                  <div>• Maintain similar group sizes</div>
+                  <div>• Support inclusive group dynamics</div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>

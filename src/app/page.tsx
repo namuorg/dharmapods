@@ -278,27 +278,34 @@ export default function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <input
-              type="file"
-              accept=".csv"
-              onChange={handleFileUpload}
-              className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
-            />
-            <div className="mt-4 flex items-center justify-between">
-              <div>
-                {attendees.length > 0 && (
-                  <p className="text-green-600 font-medium">
-                    {attendees.length} attendees loaded
-                  </p>
-                )}
+            <div className="flex items-center gap-4 mb-4">
+              <div className="relative">
+                <input
+                  type="file"
+                  accept=".csv"
+                  onChange={handleFileUpload}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  id="csv-upload"
+                />
+                <Button asChild>
+                  <label htmlFor="csv-upload" className="cursor-pointer">
+                    Upload CSV
+                  </label>
+                </Button>
               </div>
               <Button 
                 onClick={handleLoadSampleData}
                 variant="outline"
-                size="sm"
               >
                 Use Sample Data
               </Button>
+            </div>
+            <div>
+              {attendees.length > 0 && (
+                <p className="text-green-600 font-medium">
+                  {attendees.length} attendees loaded
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>

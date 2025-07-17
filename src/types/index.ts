@@ -5,7 +5,7 @@ export interface Attendee {
   gender: string;
   bipoc: boolean;
   lgbtqia: boolean;
-  experienceDays: number;
+  retreatExpDays: number;
 }
 
 export interface GroupDemographics {

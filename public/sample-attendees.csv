@@ -1,4 +1,4 @@
-name,age,gender,isBIPOC,isLGBTQIA,experienceDays
+name,age,gender,isBIPOC,isLGBTQIA,retreatExpDays
 Alice Johnson,67,Female,false,false,5
 Bob Smith,58,Male,false,false,12
 Carmen Rodriguez,56,Female,true,false,3

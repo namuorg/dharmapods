@@ -193,7 +193,7 @@ export default function Home() {
               <CardTitle>Upload Attendees CSV</CardTitle>
               <CardDescription>
                 CSV should have columns: name, age, gender, isBIPOC, isLGBTQIA,
-                experienceDays (retreat experience in days)
+                retreatExpDays
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -378,7 +378,7 @@ export default function Home() {
                     <p className="text-2xl font-bold text-slate-700">
                       {Math.round(
                         attendees.reduce(
-                          (sum, a) => sum + a.experienceDays,
+                          (sum, a) => sum + a.retreatExpDays,
                           0
                         ) / attendees.length
                       )}{" "}

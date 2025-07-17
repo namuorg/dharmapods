@@ -9,7 +9,7 @@ export function calculateGroupDemographics(members: Attendee[]): GroupDemographi
   const bipocCount = members.filter((m) => m.bipoc).length;
   const lgbtqiaCount = members.filter((m) => m.lgbtqia).length;
   const avgExperience =
-    members.reduce((sum, m) => sum + m.experienceDays, 0) / members.length;
+    members.reduce((sum, m) => sum + m.retreatExpDays, 0) / members.length;
 
   return {
     avgAge: Math.round(avgAge),

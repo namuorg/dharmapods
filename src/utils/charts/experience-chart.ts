@@ -15,7 +15,7 @@ export function getExperienceDistributionChartOptions(attendees: Attendee[]) {
 
   // Count attendees in each experience bin
   attendees.forEach((attendee) => {
-    const days = attendee.experienceDays;
+    const days = attendee.retreatExpDays;
     if (days === 0) experienceBins["0 days"]++;
     else if (days >= 1 && days <= 7) experienceBins["1-7 days"]++;
     else if (days >= 8 && days <= 14) experienceBins["8-14 days"]++;

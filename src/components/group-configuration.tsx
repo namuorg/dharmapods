@@ -85,11 +85,11 @@ export function GroupConfiguration({
             <Input
               id="groupSize"
               type="number"
-              value={groupSize}
+              value={isNaN(groupSize) ? "" : groupSize}
               onChange={(e) => handleGroupSizeChange(parseInt(e.target.value))}
               className="w-16"
             />
-            {attendeesCount > 0 && (
+            {attendeesCount > 0 && !isNaN(groupSize) && (
               <span className="text-sm text-muted-foreground">
                 ({Math.ceil(attendeesCount / groupSize)} groups)
               </span>
@@ -103,11 +103,11 @@ export function GroupConfiguration({
             <Input
               id="numberOfGroups"
               type="number"
-              value={numGroups}
+              value={isNaN(numGroups) ? "" : numGroups}
               onChange={(e) => onNumGroupsChange(parseInt(e.target.value))}
               className="w-16"
             />
-            {attendeesCount > 0 && (
+            {attendeesCount > 0 && !isNaN(numGroups) && (
               <span className="text-sm text-muted-foreground">
                 (≈ {Math.ceil(attendeesCount / numGroups)} per group)
               </span>

@@ -100,7 +100,7 @@ export function TeacherCombobox({
                   <Check
                     className={cn(
                       "ml-auto",
-                      value === name ? "opacity-100" : "opacity-0"
+                      value === name ? "opacity-100" : "opacity-0",
                     )}
                   />
                 </CommandItem>

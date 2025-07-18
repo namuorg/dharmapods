@@ -8,7 +8,6 @@ import { DraggableMember } from "./draggable-member";
 import { EmptyDropZone } from "./empty-drop-zone";
 import { TeacherCombobox } from "./teacher-combobox";
 import { Group } from "@/types";
-import { cn } from "@/lib/utils";
 
 interface NotesTextareaProps {
   value: string | undefined;
@@ -42,7 +41,7 @@ function NotesTextarea({ value, onChange, placeholder }: NotesTextareaProps) {
 
       setTimeoutId(newTimeoutId);
     },
-    [onChange, timeoutId]
+    [onChange, timeoutId],
   );
 
   // Cleanup timeout on unmount
@@ -70,7 +69,7 @@ interface GroupCardProps {
     memberId: string,
     sourceGroupId: number,
     targetGroupId: number,
-    targetIndex?: number
+    targetIndex?: number,
   ) => void;
   onTeacherNameChange: (groupId: number, teacherName: string) => void;
   onNotesChange: (groupId: number, notes: string) => void;
@@ -166,7 +165,7 @@ export const GroupCard = memo(function GroupCard({
                   <Badge key={gender} variant="outline" className="text-xs">
                     {gender}: {count}
                   </Badge>
-                )
+                ),
               )}
             </div>
           </div>

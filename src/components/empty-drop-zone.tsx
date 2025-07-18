@@ -8,7 +8,7 @@ interface EmptyDropZoneProps {
   moveMemberBetweenGroups: (
     memberId: string,
     sourceGroupId: number,
-    targetGroupId: number
+    targetGroupId: number,
   ) => void;
 }
 

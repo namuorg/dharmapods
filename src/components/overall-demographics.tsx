@@ -17,25 +17,26 @@ export function OverallDemographics({ attendees }: OverallDemographicsProps) {
   const [showExperienceChart, setShowExperienceChart] = useState(false);
 
   const avgAge = Math.round(
-    attendees.reduce((sum, a) => sum + a.age, 0) / attendees.length
+    attendees.reduce((sum, a) => sum + a.age, 0) / attendees.length,
   );
 
   const avgExperience = Math.round(
-    attendees.reduce((sum, a) => sum + a.retreatExpDays, 0) / attendees.length
+    attendees.reduce((sum, a) => sum + a.retreatExpDays, 0) / attendees.length,
   );
 
   const bipocCount = attendees.filter((a) => a.bipoc).length;
   const bipocPercentage = Math.round((bipocCount / attendees.length) * 100);
 
   const lgbtqiaCount = attendees.filter((a) => a.lgbtqia).length;
-  const lgbtqiaPercentage = Math.round(
-    (lgbtqiaCount / attendees.length) * 100
-  );
+  const lgbtqiaPercentage = Math.round((lgbtqiaCount / attendees.length) * 100);
 
-  const genderDistribution = attendees.reduce((acc, a) => {
-    acc[a.gender] = (acc[a.gender] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const genderDistribution = attendees.reduce(
+    (acc, a) => {
+      acc[a.gender] = (acc[a.gender] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
 
   return (
     <Card>

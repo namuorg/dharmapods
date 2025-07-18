@@ -20,7 +20,8 @@ const nunito = Nunito({
 
 export const metadata: Metadata = {
   title: "DharmaPods",
-  description: "Dharma retreat group distribution app with BIPOC/LGBTQIA affinity group support",
+  description:
+    "Dharma retreat group distribution app with BIPOC/LGBTQIA affinity group support",
 };
 
 export default function RootLayout({

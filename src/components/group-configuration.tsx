@@ -12,40 +12,44 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import React from "react";
 
 interface GroupConfigurationProps {
-  groupSize: number;
+  numGroups: number;
   attendeesCount: number;
-  onGroupSizeChange: (size: number) => void;
+  onNumGroupsChange: (count: number) => void;
   onDistributeGroups: () => void;
   onImportGroups: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const DEFAULT_NUMBER_OF_GROUPS = 12;
-
 export function GroupConfiguration({
-  groupSize,
+  numGroups,
   attendeesCount,
-  onGroupSizeChange,
+  onNumGroupsChange,
   onDistributeGroups,
   onImportGroups,
 }: GroupConfigurationProps) {
-  const [configMode, setConfigMode] = React.useState<"size" | "count">("count");
-  const [numberOfGroups, setNumberOfGroups] = React.useState(
-    DEFAULT_NUMBER_OF_GROUPS,
+  const [configMode, setConfigMode] = React.useState<"count" | "size">("count");
+  const [groupSize, setGroupSize] = React.useState(
+    attendeesCount > 0 ? Math.ceil(attendeesCount / numGroups) : 8,
   );
 
-  const handleModeChange = (mode: "size" | "count") => {
+  React.useEffect(() => {
+    if (attendeesCount > 0 && configMode === "count") {
+      setGroupSize(Math.ceil(attendeesCount / numGroups));
+    }
+  }, [attendeesCount, numGroups, configMode]);
+
+  const handleModeChange = (mode: "count" | "size") => {
     setConfigMode(mode);
-    if (mode === "count" && attendeesCount > 0) {
-      const calculatedSize = Math.ceil(attendeesCount / numberOfGroups);
-      onGroupSizeChange(calculatedSize);
+    if (mode === "size" && attendeesCount > 0) {
+      const calculatedGroups = Math.ceil(attendeesCount / groupSize);
+      onNumGroupsChange(calculatedGroups);
     }
   };
 
-  const handleNumberOfGroupsChange = (value: number) => {
-    setNumberOfGroups(value);
+  const handleGroupSizeChange = (value: number) => {
+    setGroupSize(value);
     if (attendeesCount > 0) {
-      const calculatedSize = Math.ceil(attendeesCount / value);
-      onGroupSizeChange(calculatedSize);
+      const calculatedGroups = Math.ceil(attendeesCount / value);
+      onNumGroupsChange(calculatedGroups);
     }
   };
 
@@ -82,7 +86,7 @@ export function GroupConfiguration({
               id="groupSize"
               type="number"
               value={groupSize}
-              onChange={(e) => onGroupSizeChange(parseInt(e.target.value))}
+              onChange={(e) => handleGroupSizeChange(parseInt(e.target.value))}
               className="w-16"
             />
             {attendeesCount > 0 && (
@@ -99,15 +103,13 @@ export function GroupConfiguration({
             <Input
               id="numberOfGroups"
               type="number"
-              value={numberOfGroups}
-              onChange={(e) =>
-                handleNumberOfGroupsChange(parseInt(e.target.value))
-              }
+              value={numGroups}
+              onChange={(e) => onNumGroupsChange(parseInt(e.target.value))}
               className="w-16"
             />
             {attendeesCount > 0 && (
               <span className="text-sm text-muted-foreground">
-                (≈ {Math.ceil(attendeesCount / numberOfGroups)} per group)
+                (≈ {Math.ceil(attendeesCount / numGroups)} per group)
               </span>
             )}
           </div>

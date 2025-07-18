@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 
-import { Attendee, Group, DEFAULT_GROUP_SIZE } from "@/types";
+import { Attendee, Group, DEFAULT_NUMBER_OF_GROUPS } from "@/types";
 import { parseCSV, exportGroupsToCSV, parseGroupsCSV } from "@/utils/csv";
 import {
   distributeIntoGroups,
@@ -18,21 +18,21 @@ import { OverallDemographics } from "@/components/overall-demographics";
 export default function Home() {
   const [attendees, setAttendees] = useState<Attendee[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
-  const [groupSize, setGroupSize] = useState(DEFAULT_GROUP_SIZE);
+  const [numGroups, setNumGroups] = useState(DEFAULT_NUMBER_OF_GROUPS);
 
   const handleTeacherNameChange = (groupId: number, teacherName: string) => {
     setGroups((prevGroups) =>
       prevGroups.map((group) =>
-        group.id === groupId ? { ...group, teacherName } : group
-      )
+        group.id === groupId ? { ...group, teacherName } : group,
+      ),
     );
   };
 
   const handleNotesChange = (groupId: number, notes: string) => {
     setGroups((prevGroups) =>
       prevGroups.map((group) =>
-        group.id === groupId ? { ...group, notes } : group
-      )
+        group.id === groupId ? { ...group, notes } : group,
+      ),
     );
   };
 
@@ -40,7 +40,7 @@ export default function Home() {
     memberId: string,
     sourceGroupId: number,
     targetGroupId: number,
-    targetIndex?: number
+    targetIndex?: number,
   ) => {
     setGroups((prevGroups) => {
       const newGroups = [...prevGroups];
@@ -50,7 +50,7 @@ export default function Home() {
       if (!sourceGroup || !targetGroup) return prevGroups;
 
       const memberIndex = sourceGroup.members.findIndex(
-        (m) => m.id === memberId
+        (m) => m.id === memberId,
       );
       if (memberIndex === -1) return prevGroups;
 
@@ -73,10 +73,10 @@ export default function Home() {
       }
 
       sourceGroup.demographics = calculateGroupDemographics(
-        sourceGroup.members
+        sourceGroup.members,
       );
       targetGroup.demographics = calculateGroupDemographics(
-        targetGroup.members
+        targetGroup.members,
       );
 
       return newGroups;
@@ -98,7 +98,7 @@ export default function Home() {
 
   const handleDistributeGroups = () => {
     if (attendees.length > 0) {
-      const distributedGroups = distributeIntoGroups(attendees, groupSize);
+      const distributedGroups = distributeIntoGroups(attendees, numGroups);
       setGroups(distributedGroups);
     }
   };
@@ -184,9 +184,9 @@ export default function Home() {
           />
 
           <GroupConfiguration
-            groupSize={groupSize}
+            numGroups={numGroups}
             attendeesCount={attendees.length}
-            onGroupSizeChange={setGroupSize}
+            onNumGroupsChange={setNumGroups}
             onDistributeGroups={handleDistributeGroups}
             onImportGroups={handleImportGroups}
           />

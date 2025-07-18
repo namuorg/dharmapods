@@ -25,3 +25,4 @@ export interface Group {
 }
 
 export const DEFAULT_GROUP_SIZE = 8;
+export const DEFAULT_NUMBER_OF_GROUPS = 12;

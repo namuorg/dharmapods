@@ -1,11 +1,16 @@
-import { Attendee, Group, GroupDemographics, DEFAULT_GROUP_SIZE } from "@/types";
+import { Attendee, Group, GroupDemographics } from "@/types";
 
-export function calculateGroupDemographics(members: Attendee[]): GroupDemographics {
+export function calculateGroupDemographics(
+  members: Attendee[],
+): GroupDemographics {
   const avgAge = members.reduce((sum, m) => sum + m.age, 0) / members.length;
-  const genderDistribution = members.reduce((acc, m) => {
-    acc[m.gender] = (acc[m.gender] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const genderDistribution = members.reduce(
+    (acc, m) => {
+      acc[m.gender] = (acc[m.gender] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
   const bipocCount = members.filter((m) => m.bipoc).length;
   const lgbtqiaCount = members.filter((m) => m.lgbtqia).length;
   const avgExperience =
@@ -22,9 +27,8 @@ export function calculateGroupDemographics(members: Attendee[]): GroupDemographi
 
 export function distributeIntoGroups(
   attendees: Attendee[],
-  groupSize: number = DEFAULT_GROUP_SIZE
+  numGroups: number,
 ): Group[] {
-  const numGroups = Math.ceil(attendees.length / groupSize);
   const groups: Attendee[][] = Array(numGroups)
     .fill(null)
     .map(() => []);

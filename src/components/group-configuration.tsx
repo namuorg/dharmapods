@@ -1,7 +1,15 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import React from "react";
 
 interface GroupConfigurationProps {
   groupSize: number;
@@ -11,6 +19,8 @@ interface GroupConfigurationProps {
   onImportGroups: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
+const DEFAULT_NUMBER_OF_GROUPS = 12;
+
 export function GroupConfiguration({
   groupSize,
   attendeesCount,
@@ -18,6 +28,27 @@ export function GroupConfiguration({
   onDistributeGroups,
   onImportGroups,
 }: GroupConfigurationProps) {
+  const [configMode, setConfigMode] = React.useState<"size" | "count">("count");
+  const [numberOfGroups, setNumberOfGroups] = React.useState(
+    DEFAULT_NUMBER_OF_GROUPS,
+  );
+
+  const handleModeChange = (mode: "size" | "count") => {
+    setConfigMode(mode);
+    if (mode === "count" && attendeesCount > 0) {
+      const calculatedSize = Math.ceil(attendeesCount / numberOfGroups);
+      onGroupSizeChange(calculatedSize);
+    }
+  };
+
+  const handleNumberOfGroupsChange = (value: number) => {
+    setNumberOfGroups(value);
+    if (attendeesCount > 0) {
+      const calculatedSize = Math.ceil(attendeesCount / value);
+      onGroupSizeChange(calculatedSize);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -27,18 +58,60 @@ export function GroupConfiguration({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center gap-2 mb-4">
-          <Label htmlFor="groupSize" className="text-sm font-medium">
-            Group Size:
-          </Label>
-          <Input
-            id="groupSize"
-            type="number"
-            value={groupSize}
-            onChange={(e) => onGroupSizeChange(parseInt(e.target.value))}
-            className="w-16"
-          />
-        </div>
+        <RadioGroup
+          value={configMode}
+          onValueChange={handleModeChange}
+          className="mb-4"
+        >
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="count" id="count" />
+            <Label htmlFor="count">Specify number of groups</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="size" id="size" />
+            <Label htmlFor="size">Specify group size</Label>
+          </div>
+        </RadioGroup>
+
+        {configMode === "size" ? (
+          <div className="flex items-center gap-2 mb-4">
+            <Label htmlFor="groupSize" className="text-sm font-medium">
+              Group Size:
+            </Label>
+            <Input
+              id="groupSize"
+              type="number"
+              value={groupSize}
+              onChange={(e) => onGroupSizeChange(parseInt(e.target.value))}
+              className="w-16"
+            />
+            {attendeesCount > 0 && (
+              <span className="text-sm text-muted-foreground">
+                ({Math.ceil(attendeesCount / groupSize)} groups)
+              </span>
+            )}
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 mb-4">
+            <Label htmlFor="numberOfGroups" className="text-sm font-medium">
+              Number of Groups:
+            </Label>
+            <Input
+              id="numberOfGroups"
+              type="number"
+              value={numberOfGroups}
+              onChange={(e) =>
+                handleNumberOfGroupsChange(parseInt(e.target.value))
+              }
+              className="w-16"
+            />
+            {attendeesCount > 0 && (
+              <span className="text-sm text-muted-foreground">
+                (≈ {Math.ceil(attendeesCount / numberOfGroups)} per group)
+              </span>
+            )}
+          </div>
+        )}
         <div className="flex flex-col sm:flex-row gap-2 mb-4">
           <Button
             onClick={onDistributeGroups}

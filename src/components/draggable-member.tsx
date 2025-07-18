@@ -139,22 +139,8 @@ export function DraggableMember({
           <span className="text-muted-foreground">
             {member.age}, {member.gender}
           </span>
-          {member.bipoc && (
-            <Badge
-              variant="secondary"
-              className="bg-amber-100 text-amber-800 hover:bg-amber-200"
-            >
-              BIPOC
-            </Badge>
-          )}
-          {member.lgbtqia && (
-            <Badge
-              variant="outline"
-              className="bg-purple-100 text-purple-800 border-purple-300 hover:bg-purple-200"
-            >
-              LGBTQIA
-            </Badge>
-          )}
+          {member.bipoc && <span title="BIPOC">🌍</span>}
+          {member.lgbtqia && <span title="LGBTQIA">🏳️‍🌈</span>}
         </div>
       </div>
       {isDraggedOver && closestEdge === "bottom" && (

@@ -1,5 +1,5 @@
 import Papa from "papaparse";
-import { Attendee } from "@/types";
+import { Attendee, Group } from "@/types";
 
 export function parseCSV(csvText: string): Attendee[] {
   const result = Papa.parse<Record<string, string>>(csvText, {
@@ -23,14 +23,14 @@ export function parseCSV(csvText: string): Attendee[] {
   }));
 }
 
-export function parseGroupsCSV(csvText: string): import("@/types").Group[] {
+export function parseGroupsCSV(csvText: string): Group[] {
   const result = Papa.parse<Record<string, string>>(csvText, {
     header: true,
     skipEmptyLines: true,
     transformHeader: (header) => header.trim(),
   });
 
-  const groupsMap = new Map<number, import("@/types").Group>();
+  const groupsMap = new Map<number, Group>();
 
   result.data.forEach((row) => {
     const groupId = parseInt(row.groupId) || 0;
@@ -73,24 +73,27 @@ export function parseGroupsCSV(csvText: string): import("@/types").Group[] {
     const members = group.members;
     group.demographics = {
       avgAge: Math.round(
-        members.reduce((sum, m) => sum + m.age, 0) / members.length
+        members.reduce((sum, m) => sum + m.age, 0) / members.length,
       ),
       avgExperience: Math.round(
-        members.reduce((sum, m) => sum + m.retreatExpDays, 0) / members.length
+        members.reduce((sum, m) => sum + m.retreatExpDays, 0) / members.length,
       ),
       bipocCount: members.filter((m) => m.bipoc).length,
       lgbtqiaCount: members.filter((m) => m.lgbtqia).length,
-      genderDistribution: members.reduce((acc, m) => {
-        acc[m.gender] = (acc[m.gender] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>),
+      genderDistribution: members.reduce(
+        (acc, m) => {
+          acc[m.gender] = (acc[m.gender] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>,
+      ),
     };
   });
 
   return groups;
 }
 
-export function exportGroupsToCSV(groups: import("@/types").Group[]): void {
+export function exportGroupsToCSV(groups: Group[]): void {
   if (groups.length === 0) return;
 
   const csvData = groups.flatMap((group) =>
@@ -104,7 +107,7 @@ export function exportGroupsToCSV(groups: import("@/types").Group[]): void {
       isBIPOC: member.bipoc,
       isLGBTQIA: member.lgbtqia,
       retreatExpDays: member.retreatExpDays,
-    }))
+    })),
   );
 
   const csv = Papa.unparse(csvData);
@@ -112,10 +115,21 @@ export function exportGroupsToCSV(groups: import("@/types").Group[]): void {
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  
-  const timestamp = new Date().toISOString().split('T')[0];
+
+  // Format timestamp as YYYY-MM-DD-HHMMSS for unique filenames (local time)
+  const now = new Date();
+  const timestamp =
+    now.getFullYear() +
+    "-" +
+    String(now.getMonth() + 1).padStart(2, "0") +
+    "-" +
+    String(now.getDate()).padStart(2, "0") +
+    "-" +
+    String(now.getHours()).padStart(2, "0") +
+    String(now.getMinutes()).padStart(2, "0") +
+    String(now.getSeconds()).padStart(2, "0");
   a.download = `dharmapods-groups-${timestamp}.csv`;
-  
+
   document.body.appendChild(a);
   a.click();
   window.URL.revokeObjectURL(url);

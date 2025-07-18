@@ -129,28 +129,33 @@ export function DraggableMember({
       <div
         ref={ref}
         className={cn(
-          "text-sm text-muted-foreground cursor-move p-2 rounded rounded-r-none",
+          "text-sm cursor-move p-2 rounded rounded-r-none flex items-center justify-between",
           getGenderBackgroundColor(member.gender),
           getAgeBorderColor(member.age)
         )}
       >
-        {member.name} ({member.age}, {member.gender})
-        {member.bipoc && (
-          <Badge
-            variant="secondary"
-            className="ml-2 bg-amber-100 text-amber-800 hover:bg-amber-200"
-          >
-            BIPOC
-          </Badge>
-        )}
-        {member.lgbtqia && (
-          <Badge
-            variant="outline"
-            className="ml-2 bg-purple-100 text-purple-800 border-purple-300 hover:bg-purple-200"
-          >
-            LGBTQIA
-          </Badge>
-        )}
+        <span>{member.name}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-muted-foreground">
+            {member.age}, {member.gender}
+          </span>
+          {member.bipoc && (
+            <Badge
+              variant="secondary"
+              className="bg-amber-100 text-amber-800 hover:bg-amber-200"
+            >
+              BIPOC
+            </Badge>
+          )}
+          {member.lgbtqia && (
+            <Badge
+              variant="outline"
+              className="bg-purple-100 text-purple-800 border-purple-300 hover:bg-purple-200"
+            >
+              LGBTQIA
+            </Badge>
+          )}
+        </div>
       </div>
       {isDraggedOver && closestEdge === "bottom" && (
         <div className="absolute left-0 right-0 h-0.5 bg-blue-500 z-10" />

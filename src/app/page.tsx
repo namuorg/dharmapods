@@ -2,18 +2,6 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import ReactECharts from "echarts-for-react";
 
 import { Attendee, Group, DEFAULT_GROUP_SIZE } from "@/types";
 import { parseCSV, exportGroupsToCSV, parseGroupsCSV } from "@/utils/csv";
@@ -21,16 +9,16 @@ import {
   distributeIntoGroups,
   calculateGroupDemographics,
 } from "@/utils/group-distribution";
-import { getAgeDistributionChartOptions } from "@/utils/charts/age-chart";
-import { getExperienceDistributionChartOptions } from "@/utils/charts/experience-chart";
 import { GroupCard } from "@/components/group-card";
+import { AttendeeUpload } from "@/components/attendee-upload";
+import { GroupConfiguration } from "@/components/group-configuration";
+import { DistributionSummary } from "@/components/distribution-summary";
+import { OverallDemographics } from "@/components/overall-demographics";
 
 export default function Home() {
   const [attendees, setAttendees] = useState<Attendee[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [groupSize, setGroupSize] = useState(DEFAULT_GROUP_SIZE);
-  const [showAgeChart, setShowAgeChart] = useState(false);
-  const [showExperienceChart, setShowExperienceChart] = useState(false);
 
   const handleTeacherNameChange = (groupId: number, teacherName: string) => {
     setGroups((prevGroups) =>
@@ -188,270 +176,31 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Upload Attendees CSV</CardTitle>
-              <CardDescription>
-                CSV should have columns: name, age, gender, isBIPOC, isLGBTQIA,
-                retreatExpDays
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-4">
-                <div className="relative w-full sm:w-auto">
-                  <input
-                    type="file"
-                    accept=".csv"
-                    onChange={handleFileUpload}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    id="csv-upload"
-                  />
-                  <Button asChild className="w-full sm:w-auto">
-                    <label htmlFor="csv-upload" className="cursor-pointer">
-                      Upload CSV
-                    </label>
-                  </Button>
-                </div>
-                <Button
-                  onClick={handleLoadSampleData}
-                  variant="outline"
-                  className="w-full sm:w-auto bg-white"
-                >
-                  Use Sample Data
-                </Button>
-                <Button
-                  onClick={handleDownloadTemplate}
-                  variant="outline"
-                  className="w-full sm:w-auto bg-muted"
-                >
-                  Download Template
-                </Button>
-              </div>
-              <div>
-                {attendees.length > 0 && (
-                  <p className="text-green-600 font-medium">
-                    {attendees.length} attendees loaded
-                  </p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          <AttendeeUpload
+            attendeesCount={attendees.length}
+            onFileUpload={handleFileUpload}
+            onLoadSampleData={handleLoadSampleData}
+            onDownloadTemplate={handleDownloadTemplate}
+          />
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Group Configuration</CardTitle>
-              <CardDescription>
-                Configure how attendees should be distributed into groups
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-2 mb-4">
-                <Label htmlFor="groupSize" className="text-sm font-medium">
-                  Group Size:
-                </Label>
-                <Input
-                  id="groupSize"
-                  type="number"
-                  value={groupSize}
-                  onChange={(e) => setGroupSize(parseInt(e.target.value))}
-                  className="w-16"
-                />
-              </div>
-              <div className="flex flex-col sm:flex-row gap-2 mb-4">
-                <Button
-                  onClick={handleDistributeGroups}
-                  className="w-full sm:flex-[2]"
-                  disabled={attendees.length === 0}
-                >
-                  Distribute into Groups
-                </Button>
-                <div className="relative w-full sm:flex-1">
-                  <input
-                    type="file"
-                    accept=".csv"
-                    onChange={handleImportGroups}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    id="groups-import"
-                  />
-                  <Button asChild variant="outline" className="bg-white w-full">
-                    <label htmlFor="groups-import" className="cursor-pointer">
-                      Import Groups
-                    </label>
-                  </Button>
-                </div>
-              </div>
-
-              <div className="border-t pt-4">
-                <h4 className="font-medium text-foreground mb-2">
-                  Distribution Goals
-                </h4>
-                <div className="text-sm text-muted-foreground space-y-1">
-                  <div>
-                    • Ensure no group has only 1 BIPOC or LGBTQIA member
-                  </div>
-                  <div>• Create balanced representation across all groups</div>
-                  <div>• Maintain similar group sizes</div>
-                  <div>• Support inclusive group dynamics</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <GroupConfiguration
+            groupSize={groupSize}
+            attendeesCount={attendees.length}
+            onGroupSizeChange={setGroupSize}
+            onDistributeGroups={handleDistributeGroups}
+            onImportGroups={handleImportGroups}
+          />
         </div>
 
         {groups.length > 0 && (
           <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle>Distribution Summary</CardTitle>
-                  <Button onClick={handleExportGroups} variant="default">
-                    Export Groups CSV
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-muted p-4 rounded">
-                    <h3 className="font-medium text-muted-foreground">
-                      Total Groups
-                    </h3>
-                    <p className="text-2xl font-bold text-slate-700">
-                      {groups.length}
-                    </p>
-                  </div>
-                  <div className="bg-muted p-4 rounded">
-                    <h3 className="font-medium text-muted-foreground">
-                      Total Attendees
-                    </h3>
-                    <p className="text-2xl font-bold text-slate-700">
-                      {attendees.length}
-                    </p>
-                  </div>
-                  <div className="bg-muted p-4 rounded">
-                    <h3 className="font-medium text-muted-foreground">
-                      Avg Group Size
-                    </h3>
-                    <p className="text-2xl font-bold text-slate-700">
-                      {Math.round(attendees.length / groups.length)}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <DistributionSummary
+              groups={groups}
+              attendees={attendees}
+              onExportGroups={handleExportGroups}
+            />
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Overall Demographics</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div
-                    className="bg-muted p-4 rounded cursor-pointer hover:bg-muted/80 transition-colors"
-                    onClick={() => {
-                      setShowAgeChart(!showAgeChart);
-                      setShowExperienceChart(false);
-                    }}
-                  >
-                    <h3 className="font-medium text-muted-foreground">
-                      Avg Age
-                    </h3>
-                    <p className="text-2xl font-bold text-slate-700">
-                      {Math.round(
-                        attendees.reduce((sum, a) => sum + a.age, 0) /
-                          attendees.length
-                      )}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Click to view distribution
-                    </p>
-                  </div>
-                  <div
-                    className="bg-muted p-4 rounded cursor-pointer hover:bg-muted/80 transition-colors"
-                    onClick={() => {
-                      setShowExperienceChart(!showExperienceChart);
-                      setShowAgeChart(false);
-                    }}
-                  >
-                    <h3 className="font-medium text-muted-foreground">
-                      Avg Retreat Experience
-                    </h3>
-                    <p className="text-2xl font-bold text-slate-700">
-                      {Math.round(
-                        attendees.reduce(
-                          (sum, a) => sum + a.retreatExpDays,
-                          0
-                        ) / attendees.length
-                      )}{" "}
-                      days
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Click to view distribution
-                    </p>
-                  </div>
-                  <div className="bg-muted p-4 rounded">
-                    <h3 className="font-medium text-muted-foreground">
-                      <span className="mr-2">🌍</span>BIPOC
-                    </h3>
-                    <p className="text-2xl font-bold text-slate-700">
-                      {attendees.filter((a) => a.bipoc).length} (
-                      {Math.round(
-                        (attendees.filter((a) => a.bipoc).length /
-                          attendees.length) *
-                          100
-                      )}
-                      %)
-                    </p>
-                  </div>
-                  <div className="bg-muted p-4 rounded">
-                    <h3 className="font-medium text-muted-foreground">
-                      <span className="mr-2">🏳️‍🌈</span>LGBTQIA
-                    </h3>
-                    <p className="text-2xl font-bold text-slate-700">
-                      {attendees.filter((a) => a.lgbtqia).length} (
-                      {Math.round(
-                        (attendees.filter((a) => a.lgbtqia).length /
-                          attendees.length) *
-                          100
-                      )}
-                      %)
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <h3 className="font-medium text-muted-foreground mb-2">
-                    Gender Distribution
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {Object.entries(
-                      attendees.reduce((acc, a) => {
-                        acc[a.gender] = (acc[a.gender] || 0) + 1;
-                        return acc;
-                      }, {} as Record<string, number>)
-                    ).map(([gender, count]) => (
-                      <Badge key={gender} variant="outline" className="text-sm">
-                        {gender}: {count}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-                {showAgeChart && (
-                  <div className="mt-6 border-t pt-6">
-                    <ReactECharts
-                      option={getAgeDistributionChartOptions(attendees)}
-                      style={{ height: "300px" }}
-                    />
-                  </div>
-                )}
-                {showExperienceChart && (
-                  <div className="mt-6 border-t pt-6">
-                    <ReactECharts
-                      option={getExperienceDistributionChartOptions(attendees)}
-                      style={{ height: "300px" }}
-                    />
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <OverallDemographics attendees={attendees} />
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {groups.map((group) => {

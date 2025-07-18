@@ -8,6 +8,7 @@ import { DraggableMember } from "./draggable-member";
 import { EmptyDropZone } from "./empty-drop-zone";
 import { TeacherCombobox } from "./teacher-combobox";
 import { Group } from "@/types";
+import { cn } from "@/lib/utils";
 
 interface NotesTextareaProps {
   value: string | undefined;
@@ -100,7 +101,7 @@ export const GroupCard = memo(function GroupCard({
           <h4 className="font-medium text-foreground mb-2">
             Members ({group.members.length})
           </h4>
-          <div className="min-h-[100px] border-2 border-dashed border-gray-200 rounded p-2">
+          <div className="border-2 border-dashed border-gray-200 rounded p-2">
             {group.members.map((member, index) => (
               <DraggableMember
                 key={member.id}

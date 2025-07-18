@@ -12,7 +12,10 @@ interface EmptyDropZoneProps {
   ) => void;
 }
 
-export function EmptyDropZone({ groupId, moveMemberBetweenGroups }: EmptyDropZoneProps) {
+export function EmptyDropZone({
+  groupId,
+  moveMemberBetweenGroups,
+}: EmptyDropZoneProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [isDraggedOver, setIsDraggedOver] = useState(false);
 
@@ -35,7 +38,7 @@ export function EmptyDropZone({ groupId, moveMemberBetweenGroups }: EmptyDropZon
   return (
     <div
       ref={ref}
-      className={`text-center py-4 transition-colors duration-200 ${
+      className={`text-center text-sm py-4 transition-colors duration-200 ${
         isDraggedOver
           ? "text-blue-600 font-medium bg-blue-50"
           : "text-muted-foreground"

@@ -11,6 +11,7 @@ import {
   extractClosestEdge,
 } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
 import { Attendee } from "@/types";
+import { cn } from "@/lib/utils";
 
 interface DraggableMemberProps {
   member: Attendee;
@@ -127,24 +128,25 @@ export function DraggableMember({
       )}
       <div
         ref={ref}
-        className={`text-sm text-muted-foreground cursor-move p-2 rounded transition-colors ${
-          member.gender.toLowerCase() === "female" || member.gender.toLowerCase() === "f"
-            ? "bg-pink-50 hover:bg-pink-100"
-            : member.gender.toLowerCase() === "male" || member.gender.toLowerCase() === "m"
-            ? "bg-blue-50 hover:bg-blue-100"
-            : member.gender.toLowerCase() === "non-binary" || member.gender.toLowerCase() === "nb"
-            ? "bg-yellow-50 hover:bg-yellow-100"
-            : "hover:bg-muted"
-        }`}
+        className={cn(
+          "text-sm text-muted-foreground cursor-move p-2 rounded transition-colors",
+          getGenderBackgroundColor(member.gender)
+        )}
       >
         {member.name} ({member.age}, {member.gender})
         {member.bipoc && (
-          <Badge variant="secondary" className="ml-2 bg-amber-100 text-amber-800 hover:bg-amber-200">
+          <Badge
+            variant="secondary"
+            className="ml-2 bg-amber-100 text-amber-800 hover:bg-amber-200"
+          >
             BIPOC
           </Badge>
         )}
         {member.lgbtqia && (
-          <Badge variant="outline" className="ml-2 bg-purple-100 text-purple-800 border-purple-300 hover:bg-purple-200">
+          <Badge
+            variant="outline"
+            className="ml-2 bg-purple-100 text-purple-800 border-purple-300 hover:bg-purple-200"
+          >
             LGBTQIA
           </Badge>
         )}
@@ -154,4 +156,22 @@ export function DraggableMember({
       )}
     </div>
   );
+}
+
+function getGenderBackgroundColor(gender: string): string {
+  if (gender.toLowerCase() === "male" || gender.toLowerCase() === "m") {
+    return "bg-blue-50 hover:bg-blue-100";
+  } else if (
+    gender.toLowerCase() === "female" ||
+    gender.toLowerCase() === "f"
+  ) {
+    return "bg-pink-50 hover:bg-pink-100";
+  } else if (
+    gender.toLowerCase() === "non-binary" ||
+    gender.toLowerCase() === "nb"
+  ) {
+    return "bg-yellow-50 hover:bg-yellow-100";
+  } else {
+    return "bg-gray-50 hover:bg-gray-100";
+  }
 }

@@ -129,8 +129,9 @@ export function DraggableMember({
       <div
         ref={ref}
         className={cn(
-          "text-sm text-muted-foreground cursor-move p-2 rounded transition-colors",
-          getGenderBackgroundColor(member.gender)
+          "text-sm text-muted-foreground cursor-move p-2 rounded rounded-r-none",
+          getGenderBackgroundColor(member.gender),
+          getAgeBorderColor(member.age)
         )}
       >
         {member.name} ({member.age}, {member.gender})
@@ -156,6 +157,28 @@ export function DraggableMember({
       )}
     </div>
   );
+}
+
+const AGE_RANGE_MIN = 20;
+const AGE_RANGE_MAX = 80;
+
+function getAgeBorderColor(age: number): string {
+  const percent = Math.min(
+    1,
+    Math.max(0, (age - AGE_RANGE_MIN) / (AGE_RANGE_MAX - AGE_RANGE_MIN))
+  );
+  const steps = [
+    "border-gray-200",
+    "border-gray-300",
+    "border-gray-400",
+    "border-gray-500",
+    "border-gray-600",
+    "border-gray-700",
+    "border-gray-800",
+    "border-gray-900",
+  ];
+  const stepIndex = Math.floor(percent * (steps.length - 1));
+  return `border-r-4 ${steps[stepIndex]}`;
 }
 
 function getGenderBackgroundColor(gender: string): string {

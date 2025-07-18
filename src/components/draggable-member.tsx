@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Badge } from "@/components/ui/badge";
 import {
   draggable,
   dropTargetForElements,
@@ -21,7 +20,7 @@ interface DraggableMemberProps {
     memberId: string,
     sourceGroupId: number,
     targetGroupId: number,
-    targetIndex?: number
+    targetIndex?: number,
   ) => void;
 }
 
@@ -50,7 +49,7 @@ export function DraggableMember({
           groupId,
           memberIndex,
         }),
-      })
+      }),
     );
 
     // Make element a drop target
@@ -93,12 +92,12 @@ export function DraggableMember({
             sourceData.memberId,
             sourceData.groupId,
             groupId,
-            targetIndex
+            targetIndex,
           );
         },
         getIsSticky: () => true,
         ...attachClosestEdge,
-      })
+      }),
     );
 
     return () => cleanup.forEach((fn) => fn());
@@ -131,7 +130,7 @@ export function DraggableMember({
         className={cn(
           "text-sm cursor-move p-2 rounded rounded-r-none flex items-center justify-between",
           getGenderBackgroundColor(member.gender),
-          getAgeBorderColor(member.age)
+          getAgeBorderColor(member.age),
         )}
       >
         <span>{member.name}</span>
@@ -156,7 +155,7 @@ const AGE_RANGE_MAX = 80;
 function getAgeBorderColor(age: number): string {
   const percent = Math.min(
     1,
-    Math.max(0, (age - AGE_RANGE_MIN) / (AGE_RANGE_MAX - AGE_RANGE_MIN))
+    Math.max(0, (age - AGE_RANGE_MIN) / (AGE_RANGE_MAX - AGE_RANGE_MIN)),
   );
   const steps = [
     "border-gray-200",
@@ -180,12 +179,9 @@ function getGenderBackgroundColor(gender: string): string {
     gender.toLowerCase() === "f"
   ) {
     return "bg-pink-50 hover:bg-pink-100";
-  } else if (
-    gender.toLowerCase() === "non-binary" ||
-    gender.toLowerCase() === "nb"
-  ) {
-    return "bg-yellow-50 hover:bg-yellow-100";
-  } else {
+  } else if (!gender || gender.trim() === "") {
     return "bg-gray-50 hover:bg-gray-100";
+  } else {
+    return "bg-yellow-50 hover:bg-yellow-100";
   }
 }

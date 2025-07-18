@@ -389,7 +389,9 @@ export default function Home() {
                     </p>
                   </div>
                   <div className="bg-muted p-4 rounded">
-                    <h3 className="font-medium text-muted-foreground">BIPOC</h3>
+                    <h3 className="font-medium text-muted-foreground">
+                      <span className="mr-2">🌍</span>BIPOC
+                    </h3>
                     <p className="text-2xl font-bold text-slate-700">
                       {attendees.filter((a) => a.bipoc).length} (
                       {Math.round(
@@ -402,7 +404,7 @@ export default function Home() {
                   </div>
                   <div className="bg-muted p-4 rounded">
                     <h3 className="font-medium text-muted-foreground">
-                      LGBTQIA
+                      <span className="mr-2">🏳️‍🌈</span>LGBTQIA
                     </h3>
                     <p className="text-2xl font-bold text-slate-700">
                       {attendees.filter((a) => a.lgbtqia).length} (

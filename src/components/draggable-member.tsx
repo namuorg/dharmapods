@@ -136,7 +136,8 @@ export function DraggableMember({
         <span>{member.name}</span>
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground">
-            {member.age}, {getGenderDisplay(member.gender)}
+            Age {member.age} · {member.retreatExpDays}d ·{" "}
+            {getGenderDisplay(member.gender)}
           </span>
           {member.bipoc && <span title="BIPOC">🌍</span>}
           {member.lgbtqia && <span title="LGBTQIA">🏳️‍🌈</span>}

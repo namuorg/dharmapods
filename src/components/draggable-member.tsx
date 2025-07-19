@@ -135,12 +135,17 @@ export function DraggableMember({
       >
         <span>{member.name}</span>
         <div className="flex items-center gap-2">
-          <span className="text-muted-foreground">
-            Age {member.age} · {member.retreatExpDays}d ·{" "}
-            {getGenderDisplay(member.gender)}
-          </span>
-          {member.bipoc && <span title="BIPOC">🌍</span>}
-          {member.lgbtqia && <span title="LGBTQIA">🏳️‍🌈</span>}
+          <div className="flex items-center gap-2">
+            {member.bipoc && <span title="BIPOC">🌍</span>}
+            {member.lgbtqia && <span title="LGBTQIA">🏳️‍🌈</span>}
+          </div>
+          <div className="flex items-center text-muted-foreground text-xs gap-2">
+            <span className="w-8 text-right">
+              {getGenderDisplay(member.gender)}
+            </span>
+            <span className="w-6 text-right">{member.retreatExpDays}d</span>
+            <span className="w-6 text-right">{member.age}</span>
+          </div>
         </div>
       </div>
       {isDraggedOver && closestEdge === "bottom" && (

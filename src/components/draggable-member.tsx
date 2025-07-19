@@ -136,7 +136,7 @@ export function DraggableMember({
         <span>{member.name}</span>
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground">
-            {member.age}, {member.gender}
+            {member.age}, {getGenderDisplay(member.gender)}
           </span>
           {member.bipoc && <span title="BIPOC">🌍</span>}
           {member.lgbtqia && <span title="LGBTQIA">🏳️‍🌈</span>}
@@ -169,6 +169,25 @@ function getAgeBorderColor(age: number): string {
   ];
   const stepIndex = Math.floor(percent * (steps.length - 1));
   return `border-r-4 ${steps[stepIndex]}`;
+}
+
+function getGenderDisplay(gender: string): string {
+  if (gender.toLowerCase() === "male" || gender.toLowerCase() === "m") {
+    return "M";
+  } else if (
+    gender.toLowerCase() === "female" ||
+    gender.toLowerCase() === "f"
+  ) {
+    return "F";
+  } else if (
+    gender.toLowerCase() === "non-binary" ||
+    gender.toLowerCase() === "nonbinary" ||
+    gender.toLowerCase() === "nb"
+  ) {
+    return "NB";
+  } else {
+    return gender;
+  }
 }
 
 function getGenderBackgroundColor(gender: string): string {

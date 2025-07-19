@@ -127,10 +127,7 @@ export function DraggableMember({
       )}
       <div
         ref={ref}
-        className={cn(
-          "text-sm cursor-move rounded flex items-stretch justify-between",
-          getGenderBackgroundColor(member.gender),
-        )}
+        className="text-sm cursor-move rounded flex items-stretch justify-between bg-white hover:bg-gray-50"
       >
         <div className="py-2 pl-2">{member.name}</div>
         <div className="flex items-stretch gap-2">
@@ -139,7 +136,12 @@ export function DraggableMember({
             {member.lgbtqia && <span title="LGBTQIA">🏳️‍🌈</span>}
           </div>
           <div className="flex items-stretch text-muted-foreground gap-2 text-xs">
-            <div className="w-6 flex items-center justify-end">
+            <div
+              className={cn(
+                "w-6 pr-2 flex items-center justify-end",
+                getGenderBorderColor(member.gender),
+              )}
+            >
               {getGenderDisplay(member.gender)}
             </div>
             <div
@@ -235,17 +237,17 @@ function getExperienceGrayBorderColor(retreatExpDays: number): string {
   return `border-r-4 ${steps[stepIndex]}`;
 }
 
-function getGenderBackgroundColor(gender: string): string {
+function getGenderBorderColor(gender: string): string {
   if (gender.toLowerCase() === "male" || gender.toLowerCase() === "m") {
-    return "bg-blue-50 hover:bg-blue-100";
+    return "border-r-4 border-blue-500";
   } else if (
     gender.toLowerCase() === "female" ||
     gender.toLowerCase() === "f"
   ) {
-    return "bg-pink-50 hover:bg-pink-100";
+    return "border-r-4 border-pink-500";
   } else if (!gender || gender.trim() === "") {
-    return "bg-gray-50 hover:bg-gray-100";
+    return "border-r-4 border-gray-400";
   } else {
-    return "bg-yellow-50 hover:bg-yellow-100";
+    return "border-r-4 border-yellow-500";
   }
 }

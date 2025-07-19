@@ -9,16 +9,25 @@ import {
   distributeIntoGroups,
   calculateGroupDemographics,
 } from "@/utils/group-distribution";
+import { sortMembers, SortOption } from "@/utils/sort";
 import { GroupCard } from "@/components/group-card";
 import { AttendeeUpload } from "@/components/attendee-upload";
 import { GroupConfiguration } from "@/components/group-configuration";
 import { DistributionSummary } from "@/components/distribution-summary";
 import { OverallDemographics } from "@/components/overall-demographics";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function Home() {
   const [attendees, setAttendees] = useState<Attendee[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [numGroups, setNumGroups] = useState(DEFAULT_NUMBER_OF_GROUPS);
+  const [sortBy, setSortBy] = useState<SortOption>("none");
 
   const handleTeacherNameChange = (groupId: number, teacherName: string) => {
     setGroups((prevGroups) =>
@@ -202,6 +211,38 @@ export default function Home() {
 
             <OverallDemographics attendees={attendees} />
 
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">Groups</h2>
+              <div className="flex items-center gap-2">
+                <label
+                  htmlFor="sort-select"
+                  className="text-sm text-muted-foreground"
+                >
+                  Sort by:
+                </label>
+                <Select
+                  value={sortBy}
+                  onValueChange={(value) => setSortBy(value as SortOption)}
+                >
+                  <SelectTrigger
+                    id="sort-select"
+                    className="w-[180px] bg-white"
+                  >
+                    <SelectValue placeholder="Select sort option" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="name">Name</SelectItem>
+                    <SelectItem value="gender">Gender</SelectItem>
+                    <SelectItem value="experience">
+                      Retreat Experience
+                    </SelectItem>
+                    <SelectItem value="age">Age</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {groups.map((group) => {
                 const existingTeacherNames = groups
@@ -209,10 +250,15 @@ export default function Home() {
                   .map((g) => g.teacherName!)
                   .filter((name, index, self) => self.indexOf(name) === index);
 
+                const sortedGroup = {
+                  ...group,
+                  members: sortMembers(group.members, sortBy),
+                };
+
                 return (
                   <GroupCard
                     key={group.id}
-                    group={group}
+                    group={sortedGroup}
                     moveMemberBetweenGroups={moveMemberBetweenGroups}
                     onTeacherNameChange={handleTeacherNameChange}
                     onNotesChange={handleNotesChange}

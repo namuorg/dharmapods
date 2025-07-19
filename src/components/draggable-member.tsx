@@ -135,7 +135,7 @@ export function DraggableMember({
             {member.bipoc && <span title="BIPOC">🌍</span>}
             {member.lgbtqia && <span title="LGBTQIA">🏳️‍🌈</span>}
           </div>
-          <div className="flex items-stretch text-muted-foreground text-xs">
+          <div className="flex items-stretch text-muted-foreground gap-2 text-xs">
             <div
               className={cn(
                 "w-8 px-1 flex items-center justify-center",
@@ -146,16 +146,16 @@ export function DraggableMember({
             </div>
             <div
               className={cn(
-                "w-8 px-1 flex items-center justify-center",
-                getExperienceBackgroundColor(member.retreatExpDays),
+                "w-8 pr-2 flex items-center justify-end",
+                getExperienceGrayBorderColor(member.retreatExpDays),
               )}
             >
               {member.retreatExpDays}d
             </div>
             <div
               className={cn(
-                "w-8 px-1 flex items-center justify-center",
-                getAgeBackgroundColor(member.age),
+                "w-8 pr-2 flex items-center justify-end",
+                getAgeGrayBorderColor(member.age),
               )}
             >
               {member.age}
@@ -192,30 +192,29 @@ function getGenderDisplay(gender: string): string {
 const AGE_RANGE_MIN = 20;
 const AGE_RANGE_MAX = 80;
 
-function getAgeBackgroundColor(age: number): string {
+function getAgeGrayBorderColor(age: number): string {
   const percent = Math.min(
     1,
     Math.max(0, (age - AGE_RANGE_MIN) / (AGE_RANGE_MAX - AGE_RANGE_MIN)),
   );
   const steps = [
-    "bg-gray-100",
-    "bg-gray-200",
-    "bg-gray-300",
-    "bg-gray-400 text-white",
-    "bg-gray-500 text-white",
-    "bg-gray-600 text-white",
-    "bg-gray-700 text-white",
-    "bg-gray-800 text-white",
-    "bg-gray-900 text-white",
+    "border-gray-200",
+    "border-gray-300",
+    "border-gray-400",
+    "border-gray-500",
+    "border-gray-600",
+    "border-gray-700",
+    "border-gray-800",
+    "border-gray-900",
   ];
   const stepIndex = Math.floor(percent * (steps.length - 1));
-  return steps[stepIndex];
+  return `border-r-4 ${steps[stepIndex]}`;
 }
 
 const EXPERIENCE_RANGE_MIN = 0;
 const EXPERIENCE_RANGE_MAX = 30;
 
-function getExperienceBackgroundColor(retreatExpDays: number): string {
+function getExperienceGrayBorderColor(retreatExpDays: number): string {
   const percent = Math.min(
     1,
     Math.max(
@@ -225,18 +224,17 @@ function getExperienceBackgroundColor(retreatExpDays: number): string {
     ),
   );
   const steps = [
-    "bg-gray-100",
-    "bg-gray-200",
-    "bg-gray-300",
-    "bg-gray-400 text-white",
-    "bg-gray-500 text-white",
-    "bg-gray-600 text-white",
-    "bg-gray-700 text-white",
-    "bg-gray-800 text-white",
-    "bg-gray-900 text-white",
+    "border-gray-200",
+    "border-gray-300",
+    "border-gray-400",
+    "border-gray-500",
+    "border-gray-600",
+    "border-gray-700",
+    "border-gray-800",
+    "border-gray-900",
   ];
   const stepIndex = Math.floor(percent * (steps.length - 1));
-  return steps[stepIndex];
+  return `border-r-4 ${steps[stepIndex]}`;
 }
 
 function getGenderBackgroundColor(gender: string): string {

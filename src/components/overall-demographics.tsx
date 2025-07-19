@@ -10,15 +10,9 @@ import { getExperienceDistributionChartOptions } from "@/utils/charts/experience
 
 interface OverallDemographicsProps {
   attendees: Attendee[];
-  gradientType: "age" | "experience";
-  onGradientTypeChange: (type: "age" | "experience") => void;
 }
 
-export function OverallDemographics({
-  attendees,
-  gradientType,
-  onGradientTypeChange,
-}: OverallDemographicsProps) {
+export function OverallDemographics({ attendees }: OverallDemographicsProps) {
   const [showAgeChart, setShowAgeChart] = useState(false);
   const [showExperienceChart, setShowExperienceChart] = useState(false);
 
@@ -50,33 +44,6 @@ export function OverallDemographics({
         <CardTitle>Overall Demographics</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="mb-4 flex items-center gap-4">
-          <span className="text-sm font-medium text-muted-foreground">
-            Gradient Display:
-          </span>
-          <div className="flex gap-2">
-            <button
-              onClick={() => onGradientTypeChange("age")}
-              className={`px-3 py-1 rounded-md text-sm transition-colors ${
-                gradientType === "age"
-                  ? "bg-slate-700 text-white"
-                  : "bg-muted hover:bg-muted/80 text-muted-foreground"
-              }`}
-            >
-              Age
-            </button>
-            <button
-              onClick={() => onGradientTypeChange("experience")}
-              className={`px-3 py-1 rounded-md text-sm transition-colors ${
-                gradientType === "experience"
-                  ? "bg-green-600 text-white"
-                  : "bg-muted hover:bg-muted/80 text-muted-foreground"
-              }`}
-            >
-              Retreat Experience
-            </button>
-          </div>
-        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div
             className="bg-muted p-4 rounded cursor-pointer hover:bg-muted/80 transition-colors"

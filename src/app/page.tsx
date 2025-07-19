@@ -201,11 +201,37 @@ export default function Home() {
               onExportGroups={handleExportGroups}
             />
 
-            <OverallDemographics
-              attendees={attendees}
-              gradientType={gradientType}
-              onGradientTypeChange={setGradientType}
-            />
+            <OverallDemographics attendees={attendees} />
+
+            <div className="flex justify-end">
+              <div className="flex items-center gap-4 p-4 bg-white rounded-lg border">
+                <span className="text-sm font-medium text-muted-foreground">
+                  Gradient Display:
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setGradientType("age")}
+                    className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                      gradientType === "age"
+                        ? "bg-slate-700 text-white"
+                        : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                    }`}
+                  >
+                    Age
+                  </button>
+                  <button
+                    onClick={() => setGradientType("experience")}
+                    className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                      gradientType === "experience"
+                        ? "bg-green-600 text-white"
+                        : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                    }`}
+                  >
+                    Retreat Experience
+                  </button>
+                </div>
+              </div>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {groups.map((group) => {

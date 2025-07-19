@@ -74,6 +74,7 @@ interface GroupCardProps {
   onTeacherNameChange: (groupId: number, teacherName: string) => void;
   onNotesChange: (groupId: number, notes: string) => void;
   existingTeacherNames?: string[];
+  gradientType?: "age" | "experience";
 }
 
 export const GroupCard = memo(function GroupCard({
@@ -82,6 +83,7 @@ export const GroupCard = memo(function GroupCard({
   onTeacherNameChange,
   onNotesChange,
   existingTeacherNames = [],
+  gradientType = "age",
 }: GroupCardProps) {
   return (
     <Card>
@@ -108,6 +110,7 @@ export const GroupCard = memo(function GroupCard({
                 memberIndex={index}
                 groupId={group.id}
                 moveMemberBetweenGroups={moveMemberBetweenGroups}
+                gradientType={gradientType}
               />
             ))}
             {group.members.length === 0 && (

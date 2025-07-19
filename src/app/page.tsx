@@ -19,6 +19,7 @@ export default function Home() {
   const [attendees, setAttendees] = useState<Attendee[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [numGroups, setNumGroups] = useState(DEFAULT_NUMBER_OF_GROUPS);
+  const [gradientType, setGradientType] = useState<"age" | "experience">("age");
 
   const handleTeacherNameChange = (groupId: number, teacherName: string) => {
     setGroups((prevGroups) =>
@@ -200,7 +201,11 @@ export default function Home() {
               onExportGroups={handleExportGroups}
             />
 
-            <OverallDemographics attendees={attendees} />
+            <OverallDemographics
+              attendees={attendees}
+              gradientType={gradientType}
+              onGradientTypeChange={setGradientType}
+            />
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {groups.map((group) => {
@@ -217,6 +222,7 @@ export default function Home() {
                     onTeacherNameChange={handleTeacherNameChange}
                     onNotesChange={handleNotesChange}
                     existingTeacherNames={existingTeacherNames}
+                    gradientType={gradientType}
                   />
                 );
               })}

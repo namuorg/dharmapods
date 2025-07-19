@@ -22,6 +22,7 @@ interface DraggableMemberProps {
     targetGroupId: number,
     targetIndex?: number,
   ) => void;
+  gradientType?: "age" | "experience";
 }
 
 export function DraggableMember({
@@ -29,6 +30,7 @@ export function DraggableMember({
   memberIndex,
   groupId,
   moveMemberBetweenGroups,
+  gradientType = "age",
 }: DraggableMemberProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [isDraggedOver, setIsDraggedOver] = useState(false);
@@ -130,7 +132,9 @@ export function DraggableMember({
         className={cn(
           "text-sm cursor-move p-2 rounded rounded-r-none flex items-center justify-between",
           getGenderBackgroundColor(member.gender),
-          getAgeBorderColor(member.age),
+          gradientType === "age"
+            ? getAgeBorderColor(member.age)
+            : getExperienceBorderColor(member.retreatExpDays),
         )}
       >
         <span>{member.name}</span>
@@ -194,6 +198,32 @@ function getGenderDisplay(gender: string): string {
   } else {
     return gender;
   }
+}
+
+const EXPERIENCE_RANGE_MIN = 0;
+const EXPERIENCE_RANGE_MAX = 30;
+
+function getExperienceBorderColor(retreatExpDays: number): string {
+  const percent = Math.min(
+    1,
+    Math.max(
+      0,
+      (retreatExpDays - EXPERIENCE_RANGE_MIN) /
+        (EXPERIENCE_RANGE_MAX - EXPERIENCE_RANGE_MIN),
+    ),
+  );
+  const steps = [
+    "border-green-200",
+    "border-green-300",
+    "border-green-400",
+    "border-green-500",
+    "border-green-600",
+    "border-green-700",
+    "border-green-800",
+    "border-green-900",
+  ];
+  const stepIndex = Math.floor(percent * (steps.length - 1));
+  return `border-r-4 ${steps[stepIndex]}`;
 }
 
 function getGenderBackgroundColor(gender: string): string {

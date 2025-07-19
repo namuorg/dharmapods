@@ -138,8 +138,8 @@ export function DraggableMember({
           <div className="flex items-stretch text-muted-foreground gap-2 text-xs">
             <div
               className={cn(
-                "w-6 pr-2 flex items-center justify-end",
-                getGenderBorderColor(member.gender),
+                "w-8 px-1 flex items-center justify-center",
+                getGenderBackgroundColor(member.gender),
               )}
             >
               {getGenderDisplay(member.gender)}
@@ -237,17 +237,17 @@ function getExperienceGrayBorderColor(retreatExpDays: number): string {
   return `border-r-4 ${steps[stepIndex]}`;
 }
 
-function getGenderBorderColor(gender: string): string {
+function getGenderBackgroundColor(gender: string): string {
   if (gender.toLowerCase() === "male" || gender.toLowerCase() === "m") {
-    return "border-r-4 border-blue-500";
+    return "bg-blue-100";
   } else if (
     gender.toLowerCase() === "female" ||
     gender.toLowerCase() === "f"
   ) {
-    return "border-r-4 border-pink-500";
+    return "bg-pink-100";
   } else if (!gender || gender.trim() === "") {
-    return "border-r-4 border-gray-400";
+    return "bg-gray-100";
   } else {
-    return "border-r-4 border-yellow-500";
+    return "bg-yellow-100";
   }
 }

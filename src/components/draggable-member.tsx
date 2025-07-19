@@ -147,8 +147,17 @@ export function DraggableMember({
             <span className="w-8 text-right">
               {getGenderDisplay(member.gender)}
             </span>
-            <span className="w-6 text-right">{member.retreatExpDays}d</span>
-            <span className="w-6 text-right">{member.age}</span>
+            {gradientType === "age" ? (
+              <>
+                <span className="w-6 text-right">{member.retreatExpDays}d</span>
+                <span className="w-6 text-right">{member.age}</span>
+              </>
+            ) : (
+              <>
+                <span className="w-6 text-right">{member.age}</span>
+                <span className="w-6 text-right">{member.retreatExpDays}d</span>
+              </>
+            )}
           </div>
         </div>
       </div>

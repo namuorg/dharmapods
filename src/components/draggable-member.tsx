@@ -22,7 +22,6 @@ interface DraggableMemberProps {
     targetGroupId: number,
     targetIndex?: number,
   ) => void;
-  gradientType?: "age" | "experience";
 }
 
 export function DraggableMember({
@@ -30,7 +29,6 @@ export function DraggableMember({
   memberIndex,
   groupId,
   moveMemberBetweenGroups,
-  gradientType = "age",
 }: DraggableMemberProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [isDraggedOver, setIsDraggedOver] = useState(false);
@@ -130,34 +128,36 @@ export function DraggableMember({
       <div
         ref={ref}
         className={cn(
-          "text-sm cursor-move p-2 rounded rounded-r-none flex items-center justify-between",
+          "text-sm cursor-move rounded px-2 flex items-center justify-between",
           getGenderBackgroundColor(member.gender),
-          gradientType === "age"
-            ? getAgeBorderColor(member.age)
-            : getExperienceBorderColor(member.retreatExpDays),
         )}
       >
-        <span>{member.name}</span>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2">
+        <div className="py-2">{member.name}</div>
+        <div className="flex items-center gap-2 self-stretch">
+          <div className="flex items-center gap-2 py-2">
             {member.bipoc && <span title="BIPOC">🌍</span>}
             {member.lgbtqia && <span title="LGBTQIA">🏳️‍🌈</span>}
           </div>
-          <div className="flex items-center text-muted-foreground text-xs gap-2">
-            <span className="w-8 text-right">
+          <div className="flex items-center text-muted-foreground gap-2 text-xs self-stretch">
+            <div className="w-8 text-right flex items-center self-stretch">
               {getGenderDisplay(member.gender)}
-            </span>
-            {gradientType === "age" ? (
-              <>
-                <span className="w-6 text-right">{member.retreatExpDays}d</span>
-                <span className="w-6 text-right">{member.age}</span>
-              </>
-            ) : (
-              <>
-                <span className="w-6 text-right">{member.age}</span>
-                <span className="w-6 text-right">{member.retreatExpDays}d</span>
-              </>
-            )}
+            </div>
+            <div
+              className={cn(
+                "w-8 text-right px-1 flex items-center self-stretch",
+                getExperienceGrayBorderColor(member.retreatExpDays),
+              )}
+            >
+              {member.retreatExpDays}d
+            </div>
+            <div
+              className={cn(
+                "w-8 text-right px-1 flex items-center self-stretch",
+                getAgeGrayBorderColor(member.age),
+              )}
+            >
+              {member.age}
+            </div>
           </div>
         </div>
       </div>
@@ -166,28 +166,6 @@ export function DraggableMember({
       )}
     </div>
   );
-}
-
-const AGE_RANGE_MIN = 20;
-const AGE_RANGE_MAX = 80;
-
-function getAgeBorderColor(age: number): string {
-  const percent = Math.min(
-    1,
-    Math.max(0, (age - AGE_RANGE_MIN) / (AGE_RANGE_MAX - AGE_RANGE_MIN)),
-  );
-  const steps = [
-    "border-gray-200",
-    "border-gray-300",
-    "border-gray-400",
-    "border-gray-500",
-    "border-gray-600",
-    "border-gray-700",
-    "border-gray-800",
-    "border-gray-900",
-  ];
-  const stepIndex = Math.floor(percent * (steps.length - 1));
-  return `border-r-4 ${steps[stepIndex]}`;
 }
 
 function getGenderDisplay(gender: string): string {
@@ -209,10 +187,32 @@ function getGenderDisplay(gender: string): string {
   }
 }
 
+const AGE_RANGE_MIN = 20;
+const AGE_RANGE_MAX = 80;
+
+function getAgeGrayBorderColor(age: number): string {
+  const percent = Math.min(
+    1,
+    Math.max(0, (age - AGE_RANGE_MIN) / (AGE_RANGE_MAX - AGE_RANGE_MIN)),
+  );
+  const steps = [
+    "border-gray-200",
+    "border-gray-300",
+    "border-gray-400",
+    "border-gray-500",
+    "border-gray-600",
+    "border-gray-700",
+    "border-gray-800",
+    "border-gray-900",
+  ];
+  const stepIndex = Math.floor(percent * (steps.length - 1));
+  return `border-r-4 ${steps[stepIndex]}`;
+}
+
 const EXPERIENCE_RANGE_MIN = 0;
 const EXPERIENCE_RANGE_MAX = 30;
 
-function getExperienceBorderColor(retreatExpDays: number): string {
+function getExperienceGrayBorderColor(retreatExpDays: number): string {
   const percent = Math.min(
     1,
     Math.max(
@@ -222,14 +222,14 @@ function getExperienceBorderColor(retreatExpDays: number): string {
     ),
   );
   const steps = [
-    "border-green-200",
-    "border-green-300",
-    "border-green-400",
-    "border-green-500",
-    "border-green-600",
-    "border-green-700",
-    "border-green-800",
-    "border-green-900",
+    "border-gray-200",
+    "border-gray-300",
+    "border-gray-400",
+    "border-gray-500",
+    "border-gray-600",
+    "border-gray-700",
+    "border-gray-800",
+    "border-gray-900",
   ];
   const stepIndex = Math.floor(percent * (steps.length - 1));
   return `border-r-4 ${steps[stepIndex]}`;

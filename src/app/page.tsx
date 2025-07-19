@@ -19,7 +19,6 @@ export default function Home() {
   const [attendees, setAttendees] = useState<Attendee[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [numGroups, setNumGroups] = useState(DEFAULT_NUMBER_OF_GROUPS);
-  const [gradientType, setGradientType] = useState<"age" | "experience">("age");
 
   const handleTeacherNameChange = (groupId: number, teacherName: string) => {
     setGroups((prevGroups) =>
@@ -203,36 +202,6 @@ export default function Home() {
 
             <OverallDemographics attendees={attendees} />
 
-            <div className="flex justify-end">
-              <div className="flex items-center gap-4 p-4 bg-white rounded-lg border">
-                <span className="text-sm font-medium text-muted-foreground">
-                  Gradient Display:
-                </span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setGradientType("age")}
-                    className={`px-3 py-1 rounded-md text-sm transition-colors ${
-                      gradientType === "age"
-                        ? "bg-slate-700 text-white"
-                        : "bg-muted hover:bg-muted/80 text-muted-foreground"
-                    }`}
-                  >
-                    Age
-                  </button>
-                  <button
-                    onClick={() => setGradientType("experience")}
-                    className={`px-3 py-1 rounded-md text-sm transition-colors ${
-                      gradientType === "experience"
-                        ? "bg-green-600 text-white"
-                        : "bg-muted hover:bg-muted/80 text-muted-foreground"
-                    }`}
-                  >
-                    Retreat Experience
-                  </button>
-                </div>
-              </div>
-            </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {groups.map((group) => {
                 const existingTeacherNames = groups
@@ -248,7 +217,6 @@ export default function Home() {
                     onTeacherNameChange={handleTeacherNameChange}
                     onNotesChange={handleNotesChange}
                     existingTeacherNames={existingTeacherNames}
-                    gradientType={gradientType}
                   />
                 );
               })}

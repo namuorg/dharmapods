@@ -28,6 +28,7 @@ export default function Home() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [numGroups, setNumGroups] = useState(DEFAULT_NUMBER_OF_GROUPS);
   const [sortBy, setSortBy] = useState<SortOption>("name");
+  const [filterByTeacher, setFilterByTeacher] = useState<string>("all");
 
   const handleTeacherNameChange = (groupId: number, teacherName: string) => {
     setGroups((prevGroups) =>
@@ -213,58 +214,104 @@ export default function Home() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">Groups</h2>
-              <div className="flex items-center gap-2">
-                <label
-                  htmlFor="sort-select"
-                  className="text-sm text-muted-foreground"
-                >
-                  Sort by:
-                </label>
-                <Select
-                  value={sortBy}
-                  onValueChange={(value) => setSortBy(value as SortOption)}
-                >
-                  <SelectTrigger
-                    id="sort-select"
-                    className="w-[180px] bg-white"
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <label
+                    htmlFor="sort-select"
+                    className="text-sm text-muted-foreground"
                   >
-                    <SelectValue placeholder="Select sort option" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="name">Name</SelectItem>
-                    <SelectItem value="gender">Gender</SelectItem>
-                    <SelectItem value="experience">
-                      Retreat Experience
-                    </SelectItem>
-                    <SelectItem value="age">Age</SelectItem>
-                  </SelectContent>
-                </Select>
+                    Sort by:
+                  </label>
+                  <Select
+                    value={sortBy}
+                    onValueChange={(value) => setSortBy(value as SortOption)}
+                  >
+                    <SelectTrigger
+                      id="sort-select"
+                      className="w-[180px] bg-white"
+                    >
+                      <SelectValue placeholder="Select sort option" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="name">Name</SelectItem>
+                      <SelectItem value="gender">Gender</SelectItem>
+                      <SelectItem value="experience">
+                        Retreat Experience
+                      </SelectItem>
+                      <SelectItem value="age">Age</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {groups.some((g) => g.teacherName) && (
+                  <div className="flex items-center gap-2">
+                    <label
+                      htmlFor="filter-select"
+                      className="text-sm text-muted-foreground"
+                    >
+                      Filter:
+                    </label>
+                    <Select
+                      value={filterByTeacher}
+                      onValueChange={setFilterByTeacher}
+                    >
+                      <SelectTrigger
+                        id="filter-select"
+                        className="w-[180px] bg-white"
+                      >
+                        <SelectValue placeholder="Select teacher" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All teachers</SelectItem>
+                        {Array.from(
+                          new Set(
+                            groups
+                              .filter((g) => g.teacherName)
+                              .map((g) => g.teacherName!),
+                          ),
+                        )
+                          .sort()
+                          .map((teacherName) => (
+                            <SelectItem key={teacherName} value={teacherName}>
+                              {teacherName}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {groups.map((group) => {
-                const existingTeacherNames = groups
-                  .filter((g) => g.id !== group.id && g.teacherName)
-                  .map((g) => g.teacherName!)
-                  .filter((name, index, self) => self.indexOf(name) === index);
+              {groups
+                .filter((group) => {
+                  if (filterByTeacher === "all") return true;
+                  return group.teacherName === filterByTeacher;
+                })
+                .map((group) => {
+                  const existingTeacherNames = groups
+                    .filter((g) => g.id !== group.id && g.teacherName)
+                    .map((g) => g.teacherName!)
+                    .filter(
+                      (name, index, self) => self.indexOf(name) === index,
+                    );
 
-                const sortedGroup = {
-                  ...group,
-                  members: sortMembers(group.members, sortBy),
-                };
+                  const sortedGroup = {
+                    ...group,
+                    members: sortMembers(group.members, sortBy),
+                  };
 
-                return (
-                  <GroupCard
-                    key={group.id}
-                    group={sortedGroup}
-                    moveMemberBetweenGroups={moveMemberBetweenGroups}
-                    onTeacherNameChange={handleTeacherNameChange}
-                    onNotesChange={handleNotesChange}
-                    existingTeacherNames={existingTeacherNames}
-                  />
-                );
-              })}
+                  return (
+                    <GroupCard
+                      key={group.id}
+                      group={sortedGroup}
+                      moveMemberBetweenGroups={moveMemberBetweenGroups}
+                      onTeacherNameChange={handleTeacherNameChange}
+                      onNotesChange={handleNotesChange}
+                      existingTeacherNames={existingTeacherNames}
+                    />
+                  );
+                })}
             </div>
           </div>
         )}

@@ -146,8 +146,8 @@ export function DraggableMember({
             </div>
             <div
               className={cn(
-                "w-8 pr-2 flex items-center justify-end",
-                getExperienceGrayBorderColor(member.retreatExpDays),
+                "w-8 px-1 flex items-center justify-center",
+                getExperienceBackgroundColor(member.retreatExpDays),
               )}
             >
               {member.retreatExpDays}d
@@ -214,7 +214,7 @@ function getAgeGrayBorderColor(age: number): string {
 const EXPERIENCE_RANGE_MIN = 0;
 const EXPERIENCE_RANGE_MAX = 30;
 
-function getExperienceGrayBorderColor(retreatExpDays: number): string {
+function getExperienceBackgroundColor(retreatExpDays: number): string {
   const percent = Math.min(
     1,
     Math.max(
@@ -224,17 +224,18 @@ function getExperienceGrayBorderColor(retreatExpDays: number): string {
     ),
   );
   const steps = [
-    "border-gray-200",
-    "border-gray-300",
-    "border-gray-400",
-    "border-gray-500",
-    "border-gray-600",
-    "border-gray-700",
-    "border-gray-800",
-    "border-gray-900",
+    "bg-gray-100",
+    "bg-gray-200",
+    "bg-gray-300",
+    "bg-gray-400 text-white",
+    "bg-gray-500 text-white",
+    "bg-gray-600 text-white",
+    "bg-gray-700 text-white",
+    "bg-gray-800 text-white",
+    "bg-gray-900 text-white",
   ];
   const stepIndex = Math.floor(percent * (steps.length - 1));
-  return `border-r-4 ${steps[stepIndex]}`;
+  return steps[stepIndex];
 }
 
 function getGenderBackgroundColor(gender: string): string {

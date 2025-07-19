@@ -139,12 +139,12 @@ export function DraggableMember({
             {member.lgbtqia && <span title="LGBTQIA">🏳️‍🌈</span>}
           </div>
           <div className="flex items-center text-muted-foreground gap-2 text-xs self-stretch">
-            <div className="w-8 text-right flex items-center self-stretch">
+            <div className="w-6 flex items-center justify-end self-stretch">
               {getGenderDisplay(member.gender)}
             </div>
             <div
               className={cn(
-                "w-8 text-right px-1 flex items-center self-stretch",
+                "w-8 pr-2 flex items-center justify-end self-stretch",
                 getExperienceGrayBorderColor(member.retreatExpDays),
               )}
             >
@@ -152,7 +152,7 @@ export function DraggableMember({
             </div>
             <div
               className={cn(
-                "w-8 text-right px-1 flex items-center self-stretch",
+                "w-8 pr-2 flex items-center justify-end self-stretch",
                 getAgeGrayBorderColor(member.age),
               )}
             >

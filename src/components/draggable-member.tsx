@@ -128,23 +128,23 @@ export function DraggableMember({
       <div
         ref={ref}
         className={cn(
-          "text-sm cursor-move rounded px-2 flex items-center justify-between",
+          "text-sm cursor-move rounded flex items-stretch justify-between",
           getGenderBackgroundColor(member.gender),
         )}
       >
-        <div className="py-2">{member.name}</div>
-        <div className="flex items-center gap-2 self-stretch">
+        <div className="py-2 pl-2">{member.name}</div>
+        <div className="flex items-stretch gap-2">
           <div className="flex items-center gap-2 py-2">
             {member.bipoc && <span title="BIPOC">🌍</span>}
             {member.lgbtqia && <span title="LGBTQIA">🏳️‍🌈</span>}
           </div>
-          <div className="flex items-center text-muted-foreground gap-2 text-xs self-stretch">
-            <div className="w-6 flex items-center justify-end self-stretch">
+          <div className="flex items-stretch text-muted-foreground gap-2 text-xs">
+            <div className="w-6 flex items-center justify-end">
               {getGenderDisplay(member.gender)}
             </div>
             <div
               className={cn(
-                "w-8 pr-2 flex items-center justify-end self-stretch",
+                "w-8 pr-2 flex items-center justify-end",
                 getExperienceGrayBorderColor(member.retreatExpDays),
               )}
             >
@@ -152,7 +152,7 @@ export function DraggableMember({
             </div>
             <div
               className={cn(
-                "w-8 pr-2 flex items-center justify-end self-stretch",
+                "w-8 pr-2 flex items-center justify-end",
                 getAgeGrayBorderColor(member.age),
               )}
             >

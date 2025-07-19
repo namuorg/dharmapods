@@ -27,7 +27,7 @@ export default function Home() {
   const [attendees, setAttendees] = useState<Attendee[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [numGroups, setNumGroups] = useState(DEFAULT_NUMBER_OF_GROUPS);
-  const [sortBy, setSortBy] = useState<SortOption>("none");
+  const [sortBy, setSortBy] = useState<SortOption>("name");
 
   const handleTeacherNameChange = (groupId: number, teacherName: string) => {
     setGroups((prevGroups) =>
@@ -231,7 +231,6 @@ export default function Home() {
                     <SelectValue placeholder="Select sort option" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
                     <SelectItem value="name">Name</SelectItem>
                     <SelectItem value="gender">Gender</SelectItem>
                     <SelectItem value="experience">

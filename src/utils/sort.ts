@@ -1,13 +1,11 @@
 import { Attendee } from "@/types";
 
-export type SortOption = "name" | "gender" | "experience" | "age" | "none";
+export type SortOption = "name" | "gender" | "experience" | "age";
 
 export function sortMembers(
   members: Attendee[],
   sortBy: SortOption,
 ): Attendee[] {
-  if (sortBy === "none") return members;
-
   const sorted = [...members];
 
   switch (sortBy) {

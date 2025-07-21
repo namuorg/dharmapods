@@ -143,7 +143,8 @@ export function GroupConfiguration({
             Distribution Goals
           </h4>
           <div className="text-sm text-muted-foreground space-y-1">
-            <div>• Ensure no group has only 1 BIPOC or LGBTQIA member</div>
+            <div>• Maintain similar experience levels within each group</div>
+            <div>• Ensure no group has only 1 BIPOC or LGBTQIA+ member</div>
             <div>• Create balanced representation across all groups</div>
             <div>• Maintain similar group sizes</div>
             <div>• Support inclusive group dynamics</div>

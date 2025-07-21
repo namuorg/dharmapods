@@ -33,24 +33,37 @@ export function distributeIntoGroups(
     .fill(null)
     .map(() => []);
 
+  // Calculate group sizes for even distribution
+  const baseGroupSize = Math.floor(attendees.length / numGroups);
+  const numLargerGroups = attendees.length % numGroups;
+
+  // Create array of target sizes for each group
+  const targetSizes: number[] = [];
+  for (let i = 0; i < numGroups; i++) {
+    targetSizes[i] = i < numLargerGroups ? baseGroupSize + 1 : baseGroupSize;
+  }
+
   // Step 1: Categorize attendees
   const bipocAndLgbtqia = attendees.filter((a) => a.bipoc && a.lgbtqia);
   const bipocOnly = attendees.filter((a) => a.bipoc && !a.lgbtqia);
   const lgbtqiaOnly = attendees.filter((a) => !a.bipoc && a.lgbtqia);
   const neither = attendees.filter((a) => !a.bipoc && !a.lgbtqia);
 
-  // Helper function to shuffle an array
-  const shuffle = (array: Attendee[]) => {
-    const shuffled = [...array];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
-  };
+  let currentGroupIndex = 0;
 
-  // Helper function to find smallest group
-  const findSmallestGroup = () => {
+  // Helper function to find next available group that can accept members
+  const findNextAvailableGroup = (numMembers: number = 1) => {
+    const startIndex = currentGroupIndex;
+    do {
+      if (
+        groups[currentGroupIndex].length + numMembers <=
+        targetSizes[currentGroupIndex]
+      ) {
+        return currentGroupIndex;
+      }
+      currentGroupIndex = (currentGroupIndex + 1) % numGroups;
+    } while (currentGroupIndex !== startIndex);
+    // If no group has space, return the smallest group
     let smallestIndex = 0;
     let smallestSize = groups[0].length;
     for (let i = 1; i < groups.length; i++) {
@@ -62,18 +75,17 @@ export function distributeIntoGroups(
     return smallestIndex;
   };
 
-  let currentGroupIndex = 0;
-
   // Step 2: Seed groups with BIPOC and LGBTQIA pairs (sorted by experience)
   const sortedBipocAndLgbtqia = bipocAndLgbtqia.sort(
     (a, b) => a.retreatExpDays - b.retreatExpDays,
   );
   for (let i = 0; i < sortedBipocAndLgbtqia.length; i += 2) {
     if (i + 1 < sortedBipocAndLgbtqia.length) {
-      // Add pair to current group
-      groups[currentGroupIndex].push(sortedBipocAndLgbtqia[i]);
-      groups[currentGroupIndex].push(sortedBipocAndLgbtqia[i + 1]);
-      currentGroupIndex = (currentGroupIndex + 1) % numGroups;
+      // Find group that can accept a pair
+      const groupIndex = findNextAvailableGroup(2);
+      groups[groupIndex].push(sortedBipocAndLgbtqia[i]);
+      groups[groupIndex].push(sortedBipocAndLgbtqia[i + 1]);
+      currentGroupIndex = (groupIndex + 1) % numGroups;
     }
   }
 
@@ -83,9 +95,10 @@ export function distributeIntoGroups(
   );
   for (let i = 0; i < sortedBipocOnly.length; i += 2) {
     if (i + 1 < sortedBipocOnly.length) {
-      groups[currentGroupIndex].push(sortedBipocOnly[i]);
-      groups[currentGroupIndex].push(sortedBipocOnly[i + 1]);
-      currentGroupIndex = (currentGroupIndex + 1) % numGroups;
+      const groupIndex = findNextAvailableGroup(2);
+      groups[groupIndex].push(sortedBipocOnly[i]);
+      groups[groupIndex].push(sortedBipocOnly[i + 1]);
+      currentGroupIndex = (groupIndex + 1) % numGroups;
     }
   }
 
@@ -95,9 +108,10 @@ export function distributeIntoGroups(
   );
   for (let i = 0; i < sortedLgbtqiaOnly.length; i += 2) {
     if (i + 1 < sortedLgbtqiaOnly.length) {
-      groups[currentGroupIndex].push(sortedLgbtqiaOnly[i]);
-      groups[currentGroupIndex].push(sortedLgbtqiaOnly[i + 1]);
-      currentGroupIndex = (currentGroupIndex + 1) % numGroups;
+      const groupIndex = findNextAvailableGroup(2);
+      groups[groupIndex].push(sortedLgbtqiaOnly[i]);
+      groups[groupIndex].push(sortedLgbtqiaOnly[i + 1]);
+      currentGroupIndex = (groupIndex + 1) % numGroups;
     }
   }
 
@@ -173,11 +187,34 @@ export function distributeIntoGroups(
 
   // Step 6: Distribute remaining attendees (neither category + any unplaced leftovers)
   const remainingAttendees = [...neither, ...leftovers];
-  const shuffledRemaining = shuffle(remainingAttendees);
+  // Sort by experience to maintain experience-based grouping
+  const sortedRemaining = remainingAttendees.sort(
+    (a, b) => a.retreatExpDays - b.retreatExpDays,
+  );
 
-  for (const attendee of shuffledRemaining) {
-    const smallestGroupIndex = findSmallestGroup();
-    groups[smallestGroupIndex].push(attendee);
+  // Fill groups with remaining attendees of similar experience
+  for (const attendee of sortedRemaining) {
+    // Find the first group that hasn't reached its target size
+    let placed = false;
+    for (let i = 0; i < groups.length; i++) {
+      if (groups[i].length < targetSizes[i]) {
+        groups[i].push(attendee);
+        placed = true;
+        break;
+      }
+    }
+    // If all groups are at target size, add to the smallest group
+    if (!placed) {
+      let smallestIndex = 0;
+      let smallestSize = groups[0].length;
+      for (let i = 1; i < groups.length; i++) {
+        if (groups[i].length < smallestSize) {
+          smallestSize = groups[i].length;
+          smallestIndex = i;
+        }
+      }
+      groups[smallestIndex].push(attendee);
+    }
   }
 
   // Convert to Group objects

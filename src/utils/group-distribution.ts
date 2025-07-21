@@ -25,17 +25,137 @@ export function calculateGroupDemographics(
   };
 }
 
+interface AffinityUnit {
+  members: Attendee[];
+  avgExperience: number;
+  affinityType: "bipoc-and-lgbtqia" | "bipoc-only" | "lgbtqia-only";
+}
+
 export function distributeIntoGroups(
   attendees: Attendee[],
   numGroups: number,
 ): Group[] {
+  // Step 1: Sort all attendees by experience
+  const sortedAttendees = [...attendees].sort(
+    (a, b) => a.retreatExpDays - b.retreatExpDays,
+  );
+
+  // Step 2: Categorize attendees by affinity type
+  const bipocAndLgbtqia = sortedAttendees.filter((a) => a.bipoc && a.lgbtqia);
+  const bipocOnly = sortedAttendees.filter((a) => a.bipoc && !a.lgbtqia);
+  const lgbtqiaOnly = sortedAttendees.filter((a) => !a.bipoc && a.lgbtqia);
+  const nonAffinityMembers = sortedAttendees.filter(
+    (a) => !a.bipoc && !a.lgbtqia,
+  );
+
+  // Step 3: Create affinity pairs/groups based on experience and affinity type
+  const affinityUnits: AffinityUnit[] = [];
+
+  // Helper function to create pairs/groups from a sorted array
+  const createAffinityUnits = (
+    members: Attendee[],
+    affinityType: "bipoc-and-lgbtqia" | "bipoc-only" | "lgbtqia-only",
+  ) => {
+    const sortedMembers = [...members].sort(
+      (a, b) => a.retreatExpDays - b.retreatExpDays,
+    );
+
+    for (let i = 0; i < sortedMembers.length; i += 2) {
+      if (i + 1 < sortedMembers.length) {
+        // Create pair
+        const pair = [sortedMembers[i], sortedMembers[i + 1]];
+        const avgExp = (pair[0].retreatExpDays + pair[1].retreatExpDays) / 2;
+        affinityUnits.push({
+          members: pair,
+          avgExperience: avgExp,
+          affinityType,
+        });
+      } else {
+        // Handle leftover - try to find a compatible pair to make a group of 3
+        let added = false;
+
+        // Look for the most recent unit with the same affinity type
+        for (let j = affinityUnits.length - 1; j >= 0; j--) {
+          const unit = affinityUnits[j];
+          // Check if all members in the unit have the same affinity type as the leftover
+          const leftover = sortedMembers[i];
+          const isCompatible = unit.members.every(
+            (m) => m.bipoc === leftover.bipoc && m.lgbtqia === leftover.lgbtqia,
+          );
+
+          if (isCompatible && unit.members.length === 2) {
+            unit.members.push(leftover);
+            // Recalculate average experience
+            unit.avgExperience =
+              unit.members.reduce((sum, m) => sum + m.retreatExpDays, 0) /
+              unit.members.length;
+            added = true;
+            break;
+          }
+        }
+
+        if (!added) {
+          // If no compatible pair found, create a single-person unit
+          affinityUnits.push({
+            members: [sortedMembers[i]],
+            avgExperience: sortedMembers[i].retreatExpDays,
+            affinityType,
+          });
+        }
+      }
+    }
+  };
+
+  // Create affinity units for each category
+  createAffinityUnits(bipocAndLgbtqia, "bipoc-and-lgbtqia");
+  createAffinityUnits(bipocOnly, "bipoc-only");
+  createAffinityUnits(lgbtqiaOnly, "lgbtqia-only");
+
+  // Sort affinity units by average experience
+  affinityUnits.sort((a, b) => a.avgExperience - b.avgExperience);
+
+  // Step 4: Create a combined list with affinity units inserted based on average experience
+  const combinedList: (Attendee | AffinityUnit)[] = [];
+  let affinityIndex = 0;
+  let nonAffinityIndex = 0;
+
+  // Merge affinity units and non-affinity members based on experience
+  while (
+    affinityIndex < affinityUnits.length ||
+    nonAffinityIndex < nonAffinityMembers.length
+  ) {
+    const currentAffinity = affinityUnits[affinityIndex];
+    const currentNonAffinity = nonAffinityMembers[nonAffinityIndex];
+
+    if (!currentNonAffinity) {
+      // Only affinity units left
+      combinedList.push(currentAffinity);
+      affinityIndex++;
+    } else if (!currentAffinity) {
+      // Only non-affinity members left
+      combinedList.push(currentNonAffinity);
+      nonAffinityIndex++;
+    } else {
+      // Compare average experience
+      if (currentAffinity.avgExperience <= currentNonAffinity.retreatExpDays) {
+        combinedList.push(currentAffinity);
+        affinityIndex++;
+      } else {
+        combinedList.push(currentNonAffinity);
+        nonAffinityIndex++;
+      }
+    }
+  }
+
+  // Step 5: Distribute into groups
   const groups: Attendee[][] = Array(numGroups)
     .fill(null)
     .map(() => []);
 
   // Calculate group sizes for even distribution
-  const baseGroupSize = Math.floor(attendees.length / numGroups);
-  const numLargerGroups = attendees.length % numGroups;
+  const totalMembers = attendees.length;
+  const baseGroupSize = Math.floor(totalMembers / numGroups);
+  const numLargerGroups = totalMembers % numGroups;
 
   // Create array of target sizes for each group
   const targetSizes: number[] = [];
@@ -43,177 +163,77 @@ export function distributeIntoGroups(
     targetSizes[i] = i < numLargerGroups ? baseGroupSize + 1 : baseGroupSize;
   }
 
-  // Step 1: Categorize attendees
-  const bipocAndLgbtqia = attendees.filter((a) => a.bipoc && a.lgbtqia);
-  const bipocOnly = attendees.filter((a) => a.bipoc && !a.lgbtqia);
-  const lgbtqiaOnly = attendees.filter((a) => !a.bipoc && a.lgbtqia);
-  const neither = attendees.filter((a) => !a.bipoc && !a.lgbtqia);
-
+  // Distribute items from combined list by filling groups sequentially
+  // This keeps members of similar experience together
   let currentGroupIndex = 0;
 
-  // Helper function to find next available group that can accept members
-  const findNextAvailableGroup = (numMembers: number = 1) => {
-    const startIndex = currentGroupIndex;
-    do {
-      if (
-        groups[currentGroupIndex].length + numMembers <=
-        targetSizes[currentGroupIndex]
-      ) {
-        return currentGroupIndex;
+  // Keep track of items we've processed
+  const processedIndices = new Set<number>();
+
+  for (let i = 0; i < combinedList.length; i++) {
+    if (processedIndices.has(i)) continue;
+
+    const item = combinedList[i];
+    const itemSize = "members" in item ? item.members.length : 1;
+    const currentGroupSize = groups[currentGroupIndex].length;
+    const remainingSpace = targetSizes[currentGroupIndex] - currentGroupSize;
+
+    // If this item fits in the current group, add it
+    if (itemSize <= remainingSpace) {
+      if ("members" in item) {
+        groups[currentGroupIndex].push(...item.members);
+      } else {
+        groups[currentGroupIndex].push(item);
       }
-      currentGroupIndex = (currentGroupIndex + 1) % numGroups;
-    } while (currentGroupIndex !== startIndex);
-    // If no group has space, return the smallest group
-    let smallestIndex = 0;
-    let smallestSize = groups[0].length;
-    for (let i = 1; i < groups.length; i++) {
-      if (groups[i].length < smallestSize) {
-        smallestSize = groups[i].length;
-        smallestIndex = i;
-      }
-    }
-    return smallestIndex;
-  };
+      processedIndices.add(i);
+    } else if (currentGroupIndex < numGroups - 1) {
+      // Item doesn't fit and we have more groups available
 
-  // Step 2: Seed groups with BIPOC and LGBTQIA pairs (sorted by experience)
-  const sortedBipocAndLgbtqia = bipocAndLgbtqia.sort(
-    (a, b) => a.retreatExpDays - b.retreatExpDays,
-  );
-  for (let i = 0; i < sortedBipocAndLgbtqia.length; i += 2) {
-    if (i + 1 < sortedBipocAndLgbtqia.length) {
-      // Find group that can accept a pair
-      const groupIndex = findNextAvailableGroup(2);
-      groups[groupIndex].push(sortedBipocAndLgbtqia[i]);
-      groups[groupIndex].push(sortedBipocAndLgbtqia[i + 1]);
-      currentGroupIndex = (groupIndex + 1) % numGroups;
-    }
-  }
+      // If it's an affinity unit, first try to fill the remaining space with non-affinity individuals
+      if ("members" in item && remainingSpace > 0) {
+        // Look ahead for non-affinity individuals to fill the gap
+        for (let j = i + 1; j < combinedList.length; j++) {
+          if (processedIndices.has(j)) continue;
 
-  // Step 3: Seed groups with BIPOC only pairs (sorted by experience)
-  const sortedBipocOnly = bipocOnly.sort(
-    (a, b) => a.retreatExpDays - b.retreatExpDays,
-  );
-  for (let i = 0; i < sortedBipocOnly.length; i += 2) {
-    if (i + 1 < sortedBipocOnly.length) {
-      const groupIndex = findNextAvailableGroup(2);
-      groups[groupIndex].push(sortedBipocOnly[i]);
-      groups[groupIndex].push(sortedBipocOnly[i + 1]);
-      currentGroupIndex = (groupIndex + 1) % numGroups;
-    }
-  }
+          const futureItem = combinedList[j];
+          if (!("members" in futureItem)) {
+            // It's a non-affinity individual
+            if (
+              groups[currentGroupIndex].length < targetSizes[currentGroupIndex]
+            ) {
+              groups[currentGroupIndex].push(futureItem);
+              processedIndices.add(j);
 
-  // Step 4: Seed groups with LGBTQIA only pairs (sorted by experience)
-  const sortedLgbtqiaOnly = lgbtqiaOnly.sort(
-    (a, b) => a.retreatExpDays - b.retreatExpDays,
-  );
-  for (let i = 0; i < sortedLgbtqiaOnly.length; i += 2) {
-    if (i + 1 < sortedLgbtqiaOnly.length) {
-      const groupIndex = findNextAvailableGroup(2);
-      groups[groupIndex].push(sortedLgbtqiaOnly[i]);
-      groups[groupIndex].push(sortedLgbtqiaOnly[i + 1]);
-      currentGroupIndex = (groupIndex + 1) % numGroups;
-    }
-  }
-
-  // Step 5: Place leftover individuals
-  const leftovers: Attendee[] = [];
-
-  // Leftover from BIPOC and LGBTQIA
-  if (sortedBipocAndLgbtqia.length % 2 === 1) {
-    const leftover = sortedBipocAndLgbtqia[sortedBipocAndLgbtqia.length - 1];
-    // Find the last group with BIPOC and LGBTQIA members (most experienced)
-    let lastGroupIndex = -1;
-
-    for (let i = groups.length - 1; i >= 0; i--) {
-      const hasBipoc = groups[i].some((m) => m.bipoc);
-      const hasLgbtqia = groups[i].some((m) => m.lgbtqia);
-      if (hasBipoc && hasLgbtqia && groups[i].length > 0) {
-        lastGroupIndex = i;
-        break;
-      }
-    }
-
-    if (lastGroupIndex !== -1) {
-      groups[lastGroupIndex].push(leftover);
-    } else {
-      // If no suitable group found, just continue and place in smallest group later
-      leftovers.push(leftover);
-    }
-  }
-
-  // Leftover from BIPOC only
-  if (sortedBipocOnly.length % 2 === 1) {
-    const leftover = sortedBipocOnly[sortedBipocOnly.length - 1];
-    // Find the last group with BIPOC members (most experienced)
-    let lastGroupIndex = -1;
-
-    for (let i = groups.length - 1; i >= 0; i--) {
-      const hasBipoc = groups[i].some((m) => m.bipoc);
-      if (hasBipoc && groups[i].length > 0) {
-        lastGroupIndex = i;
-        break;
-      }
-    }
-
-    if (lastGroupIndex !== -1) {
-      groups[lastGroupIndex].push(leftover);
-    } else {
-      // If no suitable group found, just continue and place in smallest group later
-      leftovers.push(leftover);
-    }
-  }
-
-  // Leftover from LGBTQIA only
-  if (sortedLgbtqiaOnly.length % 2 === 1) {
-    const leftover = sortedLgbtqiaOnly[sortedLgbtqiaOnly.length - 1];
-    // Find the last group with LGBTQIA members (most experienced)
-    let lastGroupIndex = -1;
-
-    for (let i = groups.length - 1; i >= 0; i--) {
-      const hasLgbtqia = groups[i].some((m) => m.lgbtqia);
-      if (hasLgbtqia && groups[i].length > 0) {
-        lastGroupIndex = i;
-        break;
-      }
-    }
-
-    if (lastGroupIndex !== -1) {
-      groups[lastGroupIndex].push(leftover);
-    } else {
-      // If no suitable group found, just continue and place in smallest group later
-      leftovers.push(leftover);
-    }
-  }
-
-  // Step 6: Distribute remaining attendees (neither category + any unplaced leftovers)
-  const remainingAttendees = [...neither, ...leftovers];
-  // Sort by experience to maintain experience-based grouping
-  const sortedRemaining = remainingAttendees.sort(
-    (a, b) => a.retreatExpDays - b.retreatExpDays,
-  );
-
-  // Fill groups with remaining attendees of similar experience
-  for (const attendee of sortedRemaining) {
-    // Find the first group that hasn't reached its target size
-    let placed = false;
-    for (let i = 0; i < groups.length; i++) {
-      if (groups[i].length < targetSizes[i]) {
-        groups[i].push(attendee);
-        placed = true;
-        break;
-      }
-    }
-    // If all groups are at target size, add to the smallest group
-    if (!placed) {
-      let smallestIndex = 0;
-      let smallestSize = groups[0].length;
-      for (let i = 1; i < groups.length; i++) {
-        if (groups[i].length < smallestSize) {
-          smallestSize = groups[i].length;
-          smallestIndex = i;
+              // If we've filled the group, stop looking
+              if (
+                groups[currentGroupIndex].length >=
+                targetSizes[currentGroupIndex]
+              ) {
+                break;
+              }
+            }
+          }
         }
       }
-      groups[smallestIndex].push(attendee);
+
+      // Move to next group
+      currentGroupIndex++;
+
+      // Add the current item to the new group
+      if ("members" in item) {
+        groups[currentGroupIndex].push(...item.members);
+      } else {
+        groups[currentGroupIndex].push(item);
+      }
+      processedIndices.add(i);
+    } else {
+      // Last group - add item even if it exceeds target size
+      if ("members" in item) {
+        groups[currentGroupIndex].push(...item.members);
+      } else {
+        groups[currentGroupIndex].push(item);
+      }
+      processedIndices.add(i);
     }
   }
 

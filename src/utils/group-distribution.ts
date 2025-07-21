@@ -107,18 +107,21 @@ export function distributeIntoGroups(
   // Leftover from BIPOC and LGBTQIA
   if (sortedBipocAndLgbtqia.length % 2 === 1) {
     const leftover = sortedBipocAndLgbtqia[sortedBipocAndLgbtqia.length - 1];
-    // Find group with existing BIPOC and LGBTQIA members
-    let placed = false;
-    for (let i = 0; i < groups.length; i++) {
+    // Find the last group with BIPOC and LGBTQIA members (most experienced)
+    let lastGroupIndex = -1;
+
+    for (let i = groups.length - 1; i >= 0; i--) {
       const hasBipoc = groups[i].some((m) => m.bipoc);
       const hasLgbtqia = groups[i].some((m) => m.lgbtqia);
-      if (hasBipoc && hasLgbtqia) {
-        groups[i].push(leftover);
-        placed = true;
+      if (hasBipoc && hasLgbtqia && groups[i].length > 0) {
+        lastGroupIndex = i;
         break;
       }
     }
-    if (!placed) {
+
+    if (lastGroupIndex !== -1) {
+      groups[lastGroupIndex].push(leftover);
+    } else {
       // If no suitable group found, just continue and place in smallest group later
       leftovers.push(leftover);
     }
@@ -127,17 +130,20 @@ export function distributeIntoGroups(
   // Leftover from BIPOC only
   if (sortedBipocOnly.length % 2 === 1) {
     const leftover = sortedBipocOnly[sortedBipocOnly.length - 1];
-    // Find group with existing BIPOC members
-    let placed = false;
-    for (let i = 0; i < groups.length; i++) {
+    // Find the last group with BIPOC members (most experienced)
+    let lastGroupIndex = -1;
+
+    for (let i = groups.length - 1; i >= 0; i--) {
       const hasBipoc = groups[i].some((m) => m.bipoc);
-      if (hasBipoc) {
-        groups[i].push(leftover);
-        placed = true;
+      if (hasBipoc && groups[i].length > 0) {
+        lastGroupIndex = i;
         break;
       }
     }
-    if (!placed) {
+
+    if (lastGroupIndex !== -1) {
+      groups[lastGroupIndex].push(leftover);
+    } else {
       // If no suitable group found, just continue and place in smallest group later
       leftovers.push(leftover);
     }
@@ -146,17 +152,20 @@ export function distributeIntoGroups(
   // Leftover from LGBTQIA only
   if (sortedLgbtqiaOnly.length % 2 === 1) {
     const leftover = sortedLgbtqiaOnly[sortedLgbtqiaOnly.length - 1];
-    // Find group with existing LGBTQIA members
-    let placed = false;
-    for (let i = 0; i < groups.length; i++) {
+    // Find the last group with LGBTQIA members (most experienced)
+    let lastGroupIndex = -1;
+
+    for (let i = groups.length - 1; i >= 0; i--) {
       const hasLgbtqia = groups[i].some((m) => m.lgbtqia);
-      if (hasLgbtqia) {
-        groups[i].push(leftover);
-        placed = true;
+      if (hasLgbtqia && groups[i].length > 0) {
+        lastGroupIndex = i;
         break;
       }
     }
-    if (!placed) {
+
+    if (lastGroupIndex !== -1) {
+      groups[lastGroupIndex].push(leftover);
+    } else {
       // If no suitable group found, just continue and place in smallest group later
       leftovers.push(leftover);
     }

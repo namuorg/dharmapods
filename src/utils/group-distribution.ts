@@ -31,6 +31,14 @@ interface AffinityUnit {
   affinityType: "bipoc-and-lgbtqia" | "bipoc-only" | "lgbtqia-only";
 }
 
+/**
+ * Distributes attendees into groups with the following goals:
+ * 1. Maintain similar experience levels within each group
+ * 2. Keep affinity members (BIPOC/LGBTQIA+) paired together by matching types
+ * 3. Ensure even distribution of group sizes
+ * 4. Create a natural progression of experience levels across groups
+ *    (Group 1: least experienced → Group N: most experienced)
+ */
 export function distributeIntoGroups(
   attendees: Attendee[],
   numGroups: number,

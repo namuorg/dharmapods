@@ -64,33 +64,39 @@ export function distributeIntoGroups(
 
   let currentGroupIndex = 0;
 
-  // Step 2: Seed groups with BIPOC and LGBTQIA pairs
-  const shuffledBipocAndLgbtqia = shuffle(bipocAndLgbtqia);
-  for (let i = 0; i < shuffledBipocAndLgbtqia.length; i += 2) {
-    if (i + 1 < shuffledBipocAndLgbtqia.length) {
+  // Step 2: Seed groups with BIPOC and LGBTQIA pairs (sorted by experience)
+  const sortedBipocAndLgbtqia = bipocAndLgbtqia.sort(
+    (a, b) => a.retreatExpDays - b.retreatExpDays,
+  );
+  for (let i = 0; i < sortedBipocAndLgbtqia.length; i += 2) {
+    if (i + 1 < sortedBipocAndLgbtqia.length) {
       // Add pair to current group
-      groups[currentGroupIndex].push(shuffledBipocAndLgbtqia[i]);
-      groups[currentGroupIndex].push(shuffledBipocAndLgbtqia[i + 1]);
+      groups[currentGroupIndex].push(sortedBipocAndLgbtqia[i]);
+      groups[currentGroupIndex].push(sortedBipocAndLgbtqia[i + 1]);
       currentGroupIndex = (currentGroupIndex + 1) % numGroups;
     }
   }
 
-  // Step 3: Seed groups with BIPOC only pairs
-  const shuffledBipocOnly = shuffle(bipocOnly);
-  for (let i = 0; i < shuffledBipocOnly.length; i += 2) {
-    if (i + 1 < shuffledBipocOnly.length) {
-      groups[currentGroupIndex].push(shuffledBipocOnly[i]);
-      groups[currentGroupIndex].push(shuffledBipocOnly[i + 1]);
+  // Step 3: Seed groups with BIPOC only pairs (sorted by experience)
+  const sortedBipocOnly = bipocOnly.sort(
+    (a, b) => a.retreatExpDays - b.retreatExpDays,
+  );
+  for (let i = 0; i < sortedBipocOnly.length; i += 2) {
+    if (i + 1 < sortedBipocOnly.length) {
+      groups[currentGroupIndex].push(sortedBipocOnly[i]);
+      groups[currentGroupIndex].push(sortedBipocOnly[i + 1]);
       currentGroupIndex = (currentGroupIndex + 1) % numGroups;
     }
   }
 
-  // Step 4: Seed groups with LGBTQIA only pairs
-  const shuffledLgbtqiaOnly = shuffle(lgbtqiaOnly);
-  for (let i = 0; i < shuffledLgbtqiaOnly.length; i += 2) {
-    if (i + 1 < shuffledLgbtqiaOnly.length) {
-      groups[currentGroupIndex].push(shuffledLgbtqiaOnly[i]);
-      groups[currentGroupIndex].push(shuffledLgbtqiaOnly[i + 1]);
+  // Step 4: Seed groups with LGBTQIA only pairs (sorted by experience)
+  const sortedLgbtqiaOnly = lgbtqiaOnly.sort(
+    (a, b) => a.retreatExpDays - b.retreatExpDays,
+  );
+  for (let i = 0; i < sortedLgbtqiaOnly.length; i += 2) {
+    if (i + 1 < sortedLgbtqiaOnly.length) {
+      groups[currentGroupIndex].push(sortedLgbtqiaOnly[i]);
+      groups[currentGroupIndex].push(sortedLgbtqiaOnly[i + 1]);
       currentGroupIndex = (currentGroupIndex + 1) % numGroups;
     }
   }
@@ -99,9 +105,8 @@ export function distributeIntoGroups(
   const leftovers: Attendee[] = [];
 
   // Leftover from BIPOC and LGBTQIA
-  if (shuffledBipocAndLgbtqia.length % 2 === 1) {
-    const leftover =
-      shuffledBipocAndLgbtqia[shuffledBipocAndLgbtqia.length - 1];
+  if (sortedBipocAndLgbtqia.length % 2 === 1) {
+    const leftover = sortedBipocAndLgbtqia[sortedBipocAndLgbtqia.length - 1];
     // Find group with existing BIPOC and LGBTQIA members
     let placed = false;
     for (let i = 0; i < groups.length; i++) {
@@ -120,8 +125,8 @@ export function distributeIntoGroups(
   }
 
   // Leftover from BIPOC only
-  if (shuffledBipocOnly.length % 2 === 1) {
-    const leftover = shuffledBipocOnly[shuffledBipocOnly.length - 1];
+  if (sortedBipocOnly.length % 2 === 1) {
+    const leftover = sortedBipocOnly[sortedBipocOnly.length - 1];
     // Find group with existing BIPOC members
     let placed = false;
     for (let i = 0; i < groups.length; i++) {
@@ -139,8 +144,8 @@ export function distributeIntoGroups(
   }
 
   // Leftover from LGBTQIA only
-  if (shuffledLgbtqiaOnly.length % 2 === 1) {
-    const leftover = shuffledLgbtqiaOnly[shuffledLgbtqiaOnly.length - 1];
+  if (sortedLgbtqiaOnly.length % 2 === 1) {
+    const leftover = sortedLgbtqiaOnly[sortedLgbtqiaOnly.length - 1];
     // Find group with existing LGBTQIA members
     let placed = false;
     for (let i = 0; i < groups.length; i++) {

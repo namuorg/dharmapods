@@ -16,7 +16,7 @@ export function sortMembers(
       return sorted.sort((a, b) => a.gender.localeCompare(b.gender));
 
     case "experience":
-      return sorted.sort((a, b) => a.retreatExpDays - b.retreatExpDays);
+      return sorted.sort((a, b) => a.retreatExp - b.retreatExp);
 
     case "age":
       return sorted.sort((a, b) => a.age - b.age);

@@ -9,8 +9,12 @@ import {
   attachClosestEdge,
   extractClosestEdge,
 } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
-import { Attendee } from "@/types";
+import { Attendee, RetreatExpUnit } from "@/types";
 import { cn } from "@/lib/utils";
+import {
+  getRetreatExpSuffix,
+  getRetreatExpRangeMax,
+} from "@/utils/retreat-exp";
 
 interface DraggableMemberProps {
   member: Attendee;
@@ -22,6 +26,7 @@ interface DraggableMemberProps {
     targetGroupId: number,
     targetIndex?: number,
   ) => void;
+  retreatExpUnit?: RetreatExpUnit;
 }
 
 export function DraggableMember({
@@ -29,6 +34,7 @@ export function DraggableMember({
   memberIndex,
   groupId,
   moveMemberBetweenGroups,
+  retreatExpUnit = "retreats",
 }: DraggableMemberProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [isDraggedOver, setIsDraggedOver] = useState(false);
@@ -147,10 +153,11 @@ export function DraggableMember({
             <div
               className={cn(
                 "w-8 pr-2 flex items-center justify-end",
-                getExperienceGrayBorderColor(member.retreatExpDays),
+                getExperienceGrayBorderColor(member.retreatExp, retreatExpUnit),
               )}
             >
-              {member.retreatExpDays}d
+              {member.retreatExp}
+              {getRetreatExpSuffix(retreatExpUnit)}
             </div>
             <div
               className={cn(
@@ -211,15 +218,18 @@ function getAgeGrayBorderColor(age: number): string {
   return `border-r-4 ${steps[stepIndex]}`;
 }
 
-const EXPERIENCE_RANGE_MIN = 0;
-const EXPERIENCE_RANGE_MAX = 30;
+function getExperienceGrayBorderColor(
+  retreatExp: number,
+  unit: RetreatExpUnit,
+): string {
+  const EXPERIENCE_RANGE_MIN = 0;
+  const EXPERIENCE_RANGE_MAX = getRetreatExpRangeMax(unit);
 
-function getExperienceGrayBorderColor(retreatExpDays: number): string {
   const percent = Math.min(
     1,
     Math.max(
       0,
-      (retreatExpDays - EXPERIENCE_RANGE_MIN) /
+      (retreatExp - EXPERIENCE_RANGE_MIN) /
         (EXPERIENCE_RANGE_MAX - EXPERIENCE_RANGE_MIN),
     ),
   );

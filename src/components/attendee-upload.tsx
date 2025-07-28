@@ -26,7 +26,7 @@ export function AttendeeUpload({
         <CardTitle>Upload Attendees CSV</CardTitle>
         <CardDescription>
           CSV should have columns: name, age, gender, isBIPOC, isLGBTQIA,
-          retreatExpDays
+          retreatExp
         </CardDescription>
       </CardHeader>
       <CardContent>

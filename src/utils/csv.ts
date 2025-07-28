@@ -19,7 +19,7 @@ export function parseCSV(csvText: string): Attendee[] {
     lgbtqia:
       row.isLGBTQIA?.toLowerCase() === "true" ||
       row.isLGBTQIA?.toLowerCase() === "yes",
-    retreatExpDays: parseInt(row.retreatExpDays) || 0,
+    retreatExp: parseInt(row.retreatExp) || 0,
   }));
 }
 
@@ -45,7 +45,7 @@ export function parseGroupsCSV(csvText: string): Group[] {
       lgbtqia:
         row.isLGBTQIA?.toLowerCase() === "true" ||
         row.isLGBTQIA?.toLowerCase() === "yes",
-      retreatExpDays: parseInt(row.retreatExpDays) || 0,
+      retreatExp: parseInt(row.retreatExp) || 0,
     };
 
     if (!groupsMap.has(groupId)) {
@@ -76,7 +76,7 @@ export function parseGroupsCSV(csvText: string): Group[] {
         members.reduce((sum, m) => sum + m.age, 0) / members.length,
       ),
       avgExperience: Math.round(
-        members.reduce((sum, m) => sum + m.retreatExpDays, 0) / members.length,
+        members.reduce((sum, m) => sum + m.retreatExp, 0) / members.length,
       ),
       bipocCount: members.filter((m) => m.bipoc).length,
       lgbtqiaCount: members.filter((m) => m.lgbtqia).length,
@@ -106,7 +106,7 @@ export function exportGroupsToCSV(groups: Group[]): void {
       gender: member.gender,
       isBIPOC: member.bipoc,
       isLGBTQIA: member.lgbtqia,
-      retreatExpDays: member.retreatExpDays,
+      retreatExp: member.retreatExp,
     })),
   );
 

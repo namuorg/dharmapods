@@ -10,7 +10,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import React from "react";
+import { RetreatExpUnit } from "@/types";
 
 interface GroupConfigurationProps {
   numGroups: number;
@@ -18,6 +26,8 @@ interface GroupConfigurationProps {
   onNumGroupsChange: (count: number) => void;
   onDistributeGroups: (avoidSoloAffinity: boolean) => void;
   onImportGroups: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  retreatExpUnit: RetreatExpUnit;
+  onRetreatExpUnitChange: (unit: RetreatExpUnit) => void;
 }
 
 export function GroupConfiguration({
@@ -26,6 +36,8 @@ export function GroupConfiguration({
   onNumGroupsChange,
   onDistributeGroups,
   onImportGroups,
+  retreatExpUnit,
+  onRetreatExpUnitChange,
 }: GroupConfigurationProps) {
   const [configMode, setConfigMode] = React.useState<"count" | "size">("count");
   const [groupSize, setGroupSize] = React.useState(
@@ -124,6 +136,25 @@ export function GroupConfiguration({
           <div className="text-sm text-muted-foreground space-y-1">
             <div>• Maintain similar group sizes</div>
             <div>• Maintain similar experience levels within each group</div>
+            <div className="flex items-center space-x-2 mb-2">
+              <Label htmlFor="exp-unit" className="text-sm font-normal">
+                Retreat experience unit:
+              </Label>
+              <Select
+                value={retreatExpUnit}
+                onValueChange={(value) =>
+                  onRetreatExpUnitChange(value as RetreatExpUnit)
+                }
+              >
+                <SelectTrigger id="exp-unit" className="w-32 h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="retreats">Retreats</SelectItem>
+                  <SelectItem value="days">Days</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="avoid-solo-affinity"

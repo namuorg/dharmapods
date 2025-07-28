@@ -14,7 +14,7 @@ export function calculateGroupDemographics(
   const bipocCount = members.filter((m) => m.bipoc).length;
   const lgbtqiaCount = members.filter((m) => m.lgbtqia).length;
   const avgExperience =
-    members.reduce((sum, m) => sum + m.retreatExpDays, 0) / members.length;
+    members.reduce((sum, m) => sum + m.retreatExp, 0) / members.length;
 
   return {
     avgAge: Math.round(avgAge),
@@ -52,7 +52,7 @@ export function distributeIntoGroups({
 }: DistributeIntoGroupsParams): Group[] {
   // Step 1: Sort all attendees by experience
   const sortedAttendees = [...attendees].sort(
-    (a, b) => a.retreatExpDays - b.retreatExpDays,
+    (a, b) => a.retreatExp - b.retreatExp,
   );
 
   // Step 2: If avoidSoloAffinity is disabled, treat all attendees the same
@@ -104,14 +104,14 @@ export function distributeIntoGroups({
     affinityType: "bipoc-and-lgbtqia" | "bipoc-only" | "lgbtqia-only",
   ) => {
     const sortedMembers = [...members].sort(
-      (a, b) => a.retreatExpDays - b.retreatExpDays,
+      (a, b) => a.retreatExp - b.retreatExp,
     );
 
     for (let i = 0; i < sortedMembers.length; i += 2) {
       if (i + 1 < sortedMembers.length) {
         // Create pair
         const pair = [sortedMembers[i], sortedMembers[i + 1]];
-        const avgExp = (pair[0].retreatExpDays + pair[1].retreatExpDays) / 2;
+        const avgExp = (pair[0].retreatExp + pair[1].retreatExp) / 2;
         affinityUnits.push({
           members: pair,
           avgExperience: avgExp,
@@ -134,7 +134,7 @@ export function distributeIntoGroups({
             unit.members.push(leftover);
             // Recalculate average experience
             unit.avgExperience =
-              unit.members.reduce((sum, m) => sum + m.retreatExpDays, 0) /
+              unit.members.reduce((sum, m) => sum + m.retreatExp, 0) /
               unit.members.length;
             added = true;
             break;
@@ -145,7 +145,7 @@ export function distributeIntoGroups({
           // If no compatible pair found, create a single-person unit
           affinityUnits.push({
             members: [sortedMembers[i]],
-            avgExperience: sortedMembers[i].retreatExpDays,
+            avgExperience: sortedMembers[i].retreatExp,
             affinityType,
           });
         }
@@ -184,7 +184,7 @@ export function distributeIntoGroups({
       nonAffinityIndex++;
     } else {
       // Compare average experience
-      if (currentAffinity.avgExperience <= currentNonAffinity.retreatExpDays) {
+      if (currentAffinity.avgExperience <= currentNonAffinity.retreatExp) {
         combinedList.push(currentAffinity);
         affinityIndex++;
       } else {

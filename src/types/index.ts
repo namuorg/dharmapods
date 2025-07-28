@@ -5,7 +5,7 @@ export interface Attendee {
   gender: string;
   bipoc: boolean;
   lgbtqia: boolean;
-  retreatExpDays: number;
+  retreatExp: number;
 }
 
 export interface GroupDemographics {
@@ -23,6 +23,8 @@ export interface Group {
   teacherName?: string;
   notes?: string;
 }
+
+export type RetreatExpUnit = "retreats" | "days";
 
 export const DEFAULT_GROUP_SIZE = 8;
 export const DEFAULT_NUMBER_OF_GROUPS = 12;

@@ -3,7 +3,12 @@
 import { useState } from "react";
 import Image from "next/image";
 
-import { Attendee, Group, DEFAULT_NUMBER_OF_GROUPS } from "@/types";
+import {
+  Attendee,
+  Group,
+  DEFAULT_NUMBER_OF_GROUPS,
+  RetreatExpUnit,
+} from "@/types";
 import { parseCSV, exportGroupsToCSV, parseGroupsCSV } from "@/utils/csv";
 import {
   distributeIntoGroups,
@@ -30,6 +35,8 @@ export default function Home() {
   const [sortBy, setSortBy] = useState<SortOption>("name");
   const [filterByTeacher, setFilterByTeacher] = useState<string>("all");
   const [avoidSoloAffinity, setAvoidSoloAffinity] = useState(true);
+  const [retreatExpUnit, setRetreatExpUnit] =
+    useState<RetreatExpUnit>("retreats");
 
   const handleTeacherNameChange = (groupId: number, teacherName: string) => {
     setGroups((prevGroups) =>
@@ -205,6 +212,8 @@ export default function Home() {
             onNumGroupsChange={setNumGroups}
             onDistributeGroups={handleDistributeGroups}
             onImportGroups={handleImportGroups}
+            retreatExpUnit={retreatExpUnit}
+            onRetreatExpUnitChange={setRetreatExpUnit}
           />
         </div>
 
@@ -216,7 +225,10 @@ export default function Home() {
               onExportGroups={handleExportGroups}
             />
 
-            <OverallDemographics attendees={attendees} />
+            <OverallDemographics
+              attendees={attendees}
+              retreatExpUnit={retreatExpUnit}
+            />
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">Groups</h2>
@@ -316,6 +328,7 @@ export default function Home() {
                       onNotesChange={handleNotesChange}
                       existingTeacherNames={existingTeacherNames}
                       avoidSoloAffinity={avoidSoloAffinity}
+                      retreatExpUnit={retreatExpUnit}
                     />
                   );
                 })}

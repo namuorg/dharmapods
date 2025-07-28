@@ -4,15 +4,19 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import ReactECharts from "echarts-for-react";
-import { Attendee } from "@/types";
+import { Attendee, RetreatExpUnit } from "@/types";
 import { getAgeDistributionChartOptions } from "@/utils/charts/age-chart";
 import { getExperienceDistributionChartOptions } from "@/utils/charts/experience-chart";
 
 interface OverallDemographicsProps {
   attendees: Attendee[];
+  retreatExpUnit?: RetreatExpUnit;
 }
 
-export function OverallDemographics({ attendees }: OverallDemographicsProps) {
+export function OverallDemographics({
+  attendees,
+  retreatExpUnit = "retreats",
+}: OverallDemographicsProps) {
   const [showAgeChart, setShowAgeChart] = useState(false);
   const [showExperienceChart, setShowExperienceChart] = useState(false);
 
@@ -21,7 +25,7 @@ export function OverallDemographics({ attendees }: OverallDemographicsProps) {
   );
 
   const avgExperience = Math.round(
-    attendees.reduce((sum, a) => sum + a.retreatExpDays, 0) / attendees.length,
+    attendees.reduce((sum, a) => sum + a.retreatExp, 0) / attendees.length,
   );
 
   const bipocCount = attendees.filter((a) => a.bipoc).length;
@@ -69,7 +73,7 @@ export function OverallDemographics({ attendees }: OverallDemographicsProps) {
               Avg Retreat Experience
             </h3>
             <p className="text-2xl font-bold text-slate-700">
-              {avgExperience} days
+              {avgExperience} {retreatExpUnit}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               Click to view distribution
@@ -115,7 +119,10 @@ export function OverallDemographics({ attendees }: OverallDemographicsProps) {
         {showExperienceChart && (
           <div className="mt-6 border-t pt-6">
             <ReactECharts
-              option={getExperienceDistributionChartOptions(attendees)}
+              option={getExperienceDistributionChartOptions(
+                attendees,
+                retreatExpUnit,
+              )}
               style={{ height: "300px" }}
             />
           </div>

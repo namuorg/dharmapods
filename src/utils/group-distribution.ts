@@ -31,6 +31,12 @@ interface AffinityUnit {
   affinityType: "bipoc-and-lgbtqia" | "bipoc-only" | "lgbtqia-only";
 }
 
+interface DistributeIntoGroupsParams {
+  attendees: Attendee[];
+  numGroups: number;
+  avoidSoloAffinity?: boolean;
+}
+
 /**
  * Distributes attendees into groups with the following goals:
  * 1. Maintain similar experience levels within each group
@@ -39,16 +45,49 @@ interface AffinityUnit {
  * 4. Create a natural progression of experience levels across groups
  *    (Group 1: least experienced → Group N: most experienced)
  */
-export function distributeIntoGroups(
-  attendees: Attendee[],
-  numGroups: number,
-): Group[] {
+export function distributeIntoGroups({
+  attendees,
+  numGroups,
+  avoidSoloAffinity = true,
+}: DistributeIntoGroupsParams): Group[] {
   // Step 1: Sort all attendees by experience
   const sortedAttendees = [...attendees].sort(
     (a, b) => a.retreatExpDays - b.retreatExpDays,
   );
 
-  // Step 2: Categorize attendees by affinity type
+  // Step 2: If avoidSoloAffinity is disabled, treat all attendees the same
+  if (!avoidSoloAffinity) {
+    // Simply distribute sorted attendees evenly into groups
+    const groups: Attendee[][] = Array(numGroups)
+      .fill(null)
+      .map(() => []);
+
+    // Calculate group sizes for even distribution
+    const totalMembers = attendees.length;
+    const baseGroupSize = Math.floor(totalMembers / numGroups);
+    const numLargerGroups = totalMembers % numGroups;
+
+    let currentIndex = 0;
+    for (let i = 0; i < numGroups; i++) {
+      const groupSize = i < numLargerGroups ? baseGroupSize + 1 : baseGroupSize;
+      for (
+        let j = 0;
+        j < groupSize && currentIndex < sortedAttendees.length;
+        j++
+      ) {
+        groups[i].push(sortedAttendees[currentIndex++]);
+      }
+    }
+
+    // Convert to Group objects
+    return groups.map((members, index) => ({
+      id: index + 1,
+      members,
+      demographics: calculateGroupDemographics(members),
+    }));
+  }
+
+  // Step 2: Categorize attendees by affinity type (only if avoidSoloAffinity is true)
   const bipocAndLgbtqia = sortedAttendees.filter((a) => a.bipoc && a.lgbtqia);
   const bipocOnly = sortedAttendees.filter((a) => a.bipoc && !a.lgbtqia);
   const lgbtqiaOnly = sortedAttendees.filter((a) => !a.bipoc && a.lgbtqia);

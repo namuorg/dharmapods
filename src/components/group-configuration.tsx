@@ -9,13 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 import React from "react";
 
 interface GroupConfigurationProps {
   numGroups: number;
   attendeesCount: number;
   onNumGroupsChange: (count: number) => void;
-  onDistributeGroups: () => void;
+  onDistributeGroups: (avoidSoloAffinity: boolean) => void;
   onImportGroups: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -30,6 +31,7 @@ export function GroupConfiguration({
   const [groupSize, setGroupSize] = React.useState(
     attendeesCount > 0 ? Math.ceil(attendeesCount / numGroups) : 8,
   );
+  const [avoidSoloAffinity, setAvoidSoloAffinity] = React.useState(true);
 
   React.useEffect(() => {
     if (attendeesCount > 0 && configMode === "count") {
@@ -114,9 +116,35 @@ export function GroupConfiguration({
             )}
           </div>
         )}
-        <div className="flex flex-col sm:flex-row gap-2 mb-4">
+
+        <div className="border-t pt-4 pb-4">
+          <h4 className="font-medium text-foreground mb-2">
+            Distribution Options
+          </h4>
+          <div className="text-sm text-muted-foreground space-y-1">
+            <div>• Maintain similar group sizes</div>
+            <div>• Maintain similar experience levels within each group</div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="avoid-solo-affinity"
+                checked={avoidSoloAffinity}
+                onCheckedChange={(checked) =>
+                  setAvoidSoloAffinity(checked as boolean)
+                }
+              />
+              <Label
+                htmlFor="avoid-solo-affinity"
+                className="text-sm font-normal cursor-pointer"
+              >
+                Ensure no group has only 1 BIPOC or LGBTQIA+ member
+              </Label>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-2">
           <Button
-            onClick={onDistributeGroups}
+            onClick={() => onDistributeGroups(avoidSoloAffinity)}
             className="w-full sm:flex-[2]"
             disabled={attendeesCount === 0}
           >
@@ -135,17 +163,6 @@ export function GroupConfiguration({
                 Import Groups
               </label>
             </Button>
-          </div>
-        </div>
-
-        <div className="border-t pt-4">
-          <h4 className="font-medium text-foreground mb-2">
-            Distribution Goals
-          </h4>
-          <div className="text-sm text-muted-foreground space-y-1">
-            <div>• Maintain similar group sizes</div>
-            <div>• Maintain similar experience levels within each group</div>
-            <div>• Ensure no group has only 1 BIPOC or LGBTQIA+ member</div>
           </div>
         </div>
       </CardContent>

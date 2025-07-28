@@ -106,9 +106,13 @@ export default function Home() {
     }
   };
 
-  const handleDistributeGroups = () => {
+  const handleDistributeGroups = (avoidSoloAffinity: boolean) => {
     if (attendees.length > 0) {
-      const distributedGroups = distributeIntoGroups(attendees, numGroups);
+      const distributedGroups = distributeIntoGroups({
+        attendees,
+        numGroups,
+        avoidSoloAffinity,
+      });
       setGroups(distributedGroups);
     }
   };

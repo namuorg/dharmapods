@@ -29,6 +29,7 @@ export default function Home() {
   const [numGroups, setNumGroups] = useState(DEFAULT_NUMBER_OF_GROUPS);
   const [sortBy, setSortBy] = useState<SortOption>("name");
   const [filterByTeacher, setFilterByTeacher] = useState<string>("all");
+  const [avoidSoloAffinity, setAvoidSoloAffinity] = useState(true);
 
   const handleTeacherNameChange = (groupId: number, teacherName: string) => {
     setGroups((prevGroups) =>
@@ -106,12 +107,13 @@ export default function Home() {
     }
   };
 
-  const handleDistributeGroups = (avoidSoloAffinity: boolean) => {
+  const handleDistributeGroups = (avoidSolo: boolean) => {
+    setAvoidSoloAffinity(avoidSolo);
     if (attendees.length > 0) {
       const distributedGroups = distributeIntoGroups({
         attendees,
         numGroups,
-        avoidSoloAffinity,
+        avoidSoloAffinity: avoidSolo,
       });
       setGroups(distributedGroups);
     }
@@ -313,6 +315,7 @@ export default function Home() {
                       onTeacherNameChange={handleTeacherNameChange}
                       onNotesChange={handleNotesChange}
                       existingTeacherNames={existingTeacherNames}
+                      avoidSoloAffinity={avoidSoloAffinity}
                     />
                   );
                 })}

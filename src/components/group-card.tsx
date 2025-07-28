@@ -74,6 +74,7 @@ interface GroupCardProps {
   onTeacherNameChange: (groupId: number, teacherName: string) => void;
   onNotesChange: (groupId: number, notes: string) => void;
   existingTeacherNames?: string[];
+  avoidSoloAffinity?: boolean;
 }
 
 export const GroupCard = memo(function GroupCard({
@@ -82,6 +83,7 @@ export const GroupCard = memo(function GroupCard({
   onTeacherNameChange,
   onNotesChange,
   existingTeacherNames = [],
+  avoidSoloAffinity = true,
 }: GroupCardProps) {
   return (
     <Card>
@@ -131,7 +133,7 @@ export const GroupCard = memo(function GroupCard({
               {group.demographics.avgExperience} days
             </div>
             <div>
-              {group.demographics.bipocCount === 1 ? (
+              {avoidSoloAffinity && group.demographics.bipocCount === 1 ? (
                 <Badge variant="destructive" className="text-xs">
                   BIPOC: {group.demographics.bipocCount}
                 </Badge>
@@ -143,7 +145,7 @@ export const GroupCard = memo(function GroupCard({
               )}
             </div>
             <div>
-              {group.demographics.lgbtqiaCount === 1 ? (
+              {avoidSoloAffinity && group.demographics.lgbtqiaCount === 1 ? (
                 <Badge variant="destructive" className="text-xs">
                   LGBTQIA: {group.demographics.lgbtqiaCount}
                 </Badge>

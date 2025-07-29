@@ -6,12 +6,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { RetreatExpUnit } from "@/types";
 
 interface AttendeeUploadProps {
   attendeesCount: number;
   onFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onLoadSampleData: () => void;
   onDownloadTemplate: () => void;
+  retreatExpUnit: RetreatExpUnit;
 }
 
 export function AttendeeUpload({
@@ -19,14 +21,16 @@ export function AttendeeUpload({
   onFileUpload,
   onLoadSampleData,
   onDownloadTemplate,
+  retreatExpUnit,
 }: AttendeeUploadProps) {
   return (
     <Card>
       <CardHeader>
         <CardTitle>Upload Attendees CSV</CardTitle>
         <CardDescription>
-          CSV should have columns: name, age, gender, isBIPOC, isLGBTQIA,
-          retreatExp
+          CSV should have columns: name, age, gender, isBIPOC, isLGBTQIA, and
+          either retreatExpCount (for number of retreats) or retreatExpDays (for
+          days)
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -60,13 +64,18 @@ export function AttendeeUpload({
             Download Template
           </Button>
         </div>
-        <div>
-          {attendeesCount > 0 && (
+
+        {attendeesCount > 0 && (
+          <div className="space-y-1">
             <p className="text-green-600 font-medium">
               {attendeesCount} attendees loaded
             </p>
-          )}
-        </div>
+            <p className="text-sm text-muted-foreground">
+              Experience unit:{" "}
+              {retreatExpUnit === "retreats" ? "Number of retreats" : "Days"}
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

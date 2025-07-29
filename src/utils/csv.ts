@@ -1,14 +1,29 @@
 import Papa from "papaparse";
-import { Attendee, Group } from "@/types";
+import { Attendee, Group, RetreatExpUnit } from "@/types";
 
-export function parseCSV(csvText: string): Attendee[] {
+export interface ParseCSVResult {
+  attendees: Attendee[];
+  retreatExpUnit: RetreatExpUnit;
+}
+
+export function parseCSV(csvText: string): ParseCSVResult {
   const result = Papa.parse<Record<string, string>>(csvText, {
     header: true,
     skipEmptyLines: true,
     transformHeader: (header) => header.trim(),
   });
 
-  return result.data.map((row, index) => ({
+  // Detect unit from header
+  let retreatExpUnit: RetreatExpUnit = "retreats"; // default
+  const headers = result.meta.fields || [];
+
+  if (headers.includes("retreatExpDays")) {
+    retreatExpUnit = "days";
+  } else if (headers.includes("retreatExpCount")) {
+    retreatExpUnit = "retreats";
+  }
+
+  const attendees = result.data.map((row, index) => ({
     id: `attendee-${Date.now()}-${index}`,
     name: row.name?.trim() || "",
     age: parseInt(row.age) || 0,
@@ -19,8 +34,10 @@ export function parseCSV(csvText: string): Attendee[] {
     lgbtqia:
       row.isLGBTQIA?.toLowerCase() === "true" ||
       row.isLGBTQIA?.toLowerCase() === "yes",
-    retreatExp: parseInt(row.retreatExp) || 0,
+    retreatExp: parseInt(row.retreatExpDays || row.retreatExpCount) || 0,
   }));
+
+  return { attendees, retreatExpUnit };
 }
 
 export function parseGroupsCSV(csvText: string): Group[] {
@@ -45,7 +62,7 @@ export function parseGroupsCSV(csvText: string): Group[] {
       lgbtqia:
         row.isLGBTQIA?.toLowerCase() === "true" ||
         row.isLGBTQIA?.toLowerCase() === "yes",
-      retreatExp: parseInt(row.retreatExp) || 0,
+      retreatExp: parseInt(row.retreatExpDays || row.retreatExpCount) || 0,
     };
 
     if (!groupsMap.has(groupId)) {
@@ -93,22 +110,33 @@ export function parseGroupsCSV(csvText: string): Group[] {
   return groups;
 }
 
-export function exportGroupsToCSV(groups: Group[]): void {
+export function exportGroupsToCSV(
+  groups: Group[],
+  unit: RetreatExpUnit = "retreats",
+): void {
   if (groups.length === 0) return;
 
-  const csvData = groups.flatMap((group) =>
-    group.members.map((member) => ({
-      groupId: group.id,
-      teacherName: group.teacherName || "",
-      groupNotes: group.notes || "",
-      name: member.name,
-      age: member.age,
-      gender: member.gender,
-      isBIPOC: member.bipoc,
-      isLGBTQIA: member.lgbtqia,
-      retreatExp: member.retreatExp,
-    })),
-  );
+  const csvData = groups.flatMap((group) => {
+    return group.members.map((member) => {
+      const baseRow = {
+        groupId: group.id,
+        teacherName: group.teacherName || "",
+        groupNotes: group.notes || "",
+        name: member.name,
+        age: member.age,
+        gender: member.gender,
+        isBIPOC: member.bipoc,
+        isLGBTQIA: member.lgbtqia,
+      };
+
+      // Use the appropriate column name based on unit
+      if (unit === "days") {
+        return { ...baseRow, retreatExpDays: member.retreatExp };
+      } else {
+        return { ...baseRow, retreatExpCount: member.retreatExp };
+      }
+    });
+  });
 
   const csv = Papa.unparse(csvData);
   const blob = new Blob([csv], { type: "text/csv" });

@@ -107,8 +107,10 @@ export default function Home() {
       const reader = new FileReader();
       reader.onload = (e) => {
         const csvText = e.target?.result as string;
-        const parsedAttendees = parseCSV(csvText);
+        const { attendees: parsedAttendees, retreatExpUnit } =
+          parseCSV(csvText);
         setAttendees(parsedAttendees);
+        setRetreatExpUnit(retreatExpUnit);
       };
       reader.readAsText(file);
     }
@@ -130,8 +132,9 @@ export default function Home() {
     try {
       const response = await fetch("/sample-attendees.csv");
       const csvText = await response.text();
-      const parsedAttendees = parseCSV(csvText);
+      const { attendees: parsedAttendees, retreatExpUnit } = parseCSV(csvText);
       setAttendees(parsedAttendees);
+      setRetreatExpUnit(retreatExpUnit);
       setGroups([]);
     } catch (error) {
       console.error("Error loading sample data:", error);
@@ -157,7 +160,7 @@ export default function Home() {
   };
 
   const handleExportGroups = () => {
-    exportGroupsToCSV(groups);
+    exportGroupsToCSV(groups, retreatExpUnit);
   };
 
   const handleImportGroups = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -204,6 +207,7 @@ export default function Home() {
             onFileUpload={handleFileUpload}
             onLoadSampleData={handleLoadSampleData}
             onDownloadTemplate={handleDownloadTemplate}
+            retreatExpUnit={retreatExpUnit}
           />
 
           <GroupConfiguration
@@ -212,8 +216,6 @@ export default function Home() {
             onNumGroupsChange={setNumGroups}
             onDistributeGroups={handleDistributeGroups}
             onImportGroups={handleImportGroups}
-            retreatExpUnit={retreatExpUnit}
-            onRetreatExpUnitChange={setRetreatExpUnit}
           />
         </div>
 

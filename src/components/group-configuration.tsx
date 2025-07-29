@@ -121,24 +121,20 @@ export function GroupConfiguration({
           <h4 className="font-medium text-foreground mb-2">
             Distribution Options
           </h4>
-          <div className="text-sm text-muted-foreground space-y-1">
-            <div>• Maintain similar group sizes</div>
-            <div>• Maintain similar experience levels within each group</div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="avoid-solo-affinity"
-                checked={avoidSoloAffinity}
-                onCheckedChange={(checked) =>
-                  setAvoidSoloAffinity(checked as boolean)
-                }
-              />
-              <Label
-                htmlFor="avoid-solo-affinity"
-                className="text-sm font-normal cursor-pointer"
-              >
-                Ensure no group has only 1 BIPOC or LGBTQIA+ member
-              </Label>
-            </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="avoid-solo-affinity"
+              checked={avoidSoloAffinity}
+              onCheckedChange={(checked) =>
+                setAvoidSoloAffinity(checked as boolean)
+              }
+            />
+            <Label
+              htmlFor="avoid-solo-affinity"
+              className="text-sm font-normal cursor-pointer"
+            >
+              Ensure no group has only 1 BIPOC or LGBTQIA+ member
+            </Label>
           </div>
         </div>
 

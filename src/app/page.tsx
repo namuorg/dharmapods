@@ -120,13 +120,17 @@ export default function Home() {
     }
   };
 
-  const handleDistributeGroups = (avoidSolo: boolean) => {
+  const handleDistributeGroups = (
+    avoidSolo: boolean,
+    groupingMethod: "experience" | "random",
+  ) => {
     setAvoidSoloAffinity(avoidSolo);
     if (attendees.length > 0) {
       const distributedGroups = distributeIntoGroups({
         attendees,
         numGroups,
         avoidSoloAffinity: avoidSolo,
+        groupingMethod,
       });
       setGroups(distributedGroups);
     }

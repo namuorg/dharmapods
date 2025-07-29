@@ -35,6 +35,7 @@ interface DistributeIntoGroupsParams {
   attendees: Attendee[];
   numGroups: number;
   avoidSoloAffinity?: boolean;
+  groupingMethod?: "experience" | "random";
 }
 
 /**
@@ -49,15 +50,31 @@ export function distributeIntoGroups({
   attendees,
   numGroups,
   avoidSoloAffinity = true,
+  groupingMethod = "experience",
 }: DistributeIntoGroupsParams): Group[] {
-  // Step 1: Sort all attendees by experience
-  const sortedAttendees = [...attendees].sort(
-    (a, b) => a.retreatExp - b.retreatExp,
-  );
+  // Step 1: Sort attendees based on grouping method
+  let sortedAttendees: Attendee[];
 
-  // Step 2: If avoidSoloAffinity is disabled, treat all attendees the same
+  if (groupingMethod === "random") {
+    // Shuffle array for random distribution
+    sortedAttendees = [...attendees];
+    for (let i = sortedAttendees.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [sortedAttendees[i], sortedAttendees[j]] = [
+        sortedAttendees[j],
+        sortedAttendees[i],
+      ];
+    }
+  } else {
+    // Sort by experience for experience-based grouping
+    sortedAttendees = [...attendees].sort(
+      (a, b) => a.retreatExp - b.retreatExp,
+    );
+  }
+
+  // Step 2: If avoidSoloAffinity is disabled, use simple distribution
   if (!avoidSoloAffinity) {
-    // Simply distribute sorted attendees evenly into groups
+    // Simply distribute sorted/shuffled attendees evenly into groups
     const groups: Attendee[][] = Array(numGroups)
       .fill(null)
       .map(() => []);
@@ -98,14 +115,16 @@ export function distributeIntoGroups({
   // Step 3: Create affinity pairs/groups based on experience and affinity type
   const affinityUnits: AffinityUnit[] = [];
 
-  // Helper function to create pairs/groups from a sorted array
+  // Helper function to create pairs/groups
   const createAffinityUnits = (
     members: Attendee[],
     affinityType: "bipoc-and-lgbtqia" | "bipoc-only" | "lgbtqia-only",
   ) => {
-    const sortedMembers = [...members].sort(
-      (a, b) => a.retreatExp - b.retreatExp,
-    );
+    // For random grouping, members are already shuffled; for experience-based, sort them
+    const sortedMembers =
+      groupingMethod === "random"
+        ? [...members] // Already shuffled, just copy
+        : [...members].sort((a, b) => a.retreatExp - b.retreatExp);
 
     for (let i = 0; i < sortedMembers.length; i += 2) {
       if (i + 1 < sortedMembers.length) {
@@ -158,38 +177,55 @@ export function distributeIntoGroups({
   createAffinityUnits(bipocOnly, "bipoc-only");
   createAffinityUnits(lgbtqiaOnly, "lgbtqia-only");
 
-  // Sort affinity units by average experience
-  affinityUnits.sort((a, b) => a.avgExperience - b.avgExperience);
+  // Sort affinity units only for experience-based grouping
+  if (groupingMethod === "experience") {
+    // Sort by average experience for experience-based grouping
+    affinityUnits.sort((a, b) => a.avgExperience - b.avgExperience);
+  }
+  // For random grouping, affinity units are already in random order
 
-  // Step 4: Create a combined list with affinity units inserted based on average experience
+  // Step 4: Create a combined list
   const combinedList: (Attendee | AffinityUnit)[] = [];
-  let affinityIndex = 0;
-  let nonAffinityIndex = 0;
 
-  // Merge affinity units and non-affinity members based on experience
-  while (
-    affinityIndex < affinityUnits.length ||
-    nonAffinityIndex < nonAffinityMembers.length
-  ) {
-    const currentAffinity = affinityUnits[affinityIndex];
-    const currentNonAffinity = nonAffinityMembers[nonAffinityIndex];
+  if (groupingMethod === "random") {
+    // For random grouping, combine affinity units and non-affinity members (both already random)
+    combinedList.push(...affinityUnits);
+    combinedList.push(...nonAffinityMembers);
 
-    if (!currentNonAffinity) {
-      // Only affinity units left
-      combinedList.push(currentAffinity);
-      affinityIndex++;
-    } else if (!currentAffinity) {
-      // Only non-affinity members left
-      combinedList.push(currentNonAffinity);
-      nonAffinityIndex++;
-    } else {
-      // Compare average experience
-      if (currentAffinity.avgExperience <= currentNonAffinity.retreatExp) {
+    // Shuffle the combined list to mix affinity units and non-affinity members
+    for (let i = combinedList.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [combinedList[i], combinedList[j]] = [combinedList[j], combinedList[i]];
+    }
+  } else {
+    // For experience-based grouping, merge based on experience
+    let affinityIndex = 0;
+    let nonAffinityIndex = 0;
+
+    while (
+      affinityIndex < affinityUnits.length ||
+      nonAffinityIndex < nonAffinityMembers.length
+    ) {
+      const currentAffinity = affinityUnits[affinityIndex];
+      const currentNonAffinity = nonAffinityMembers[nonAffinityIndex];
+
+      if (!currentNonAffinity) {
+        // Only affinity units left
         combinedList.push(currentAffinity);
         affinityIndex++;
-      } else {
+      } else if (!currentAffinity) {
+        // Only non-affinity members left
         combinedList.push(currentNonAffinity);
         nonAffinityIndex++;
+      } else {
+        // Compare average experience
+        if (currentAffinity.avgExperience <= currentNonAffinity.retreatExp) {
+          combinedList.push(currentAffinity);
+          affinityIndex++;
+        } else {
+          combinedList.push(currentNonAffinity);
+          nonAffinityIndex++;
+        }
       }
     }
   }

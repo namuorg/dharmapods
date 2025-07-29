@@ -16,7 +16,10 @@ interface GroupConfigurationProps {
   numGroups: number;
   attendeesCount: number;
   onNumGroupsChange: (count: number) => void;
-  onDistributeGroups: (avoidSoloAffinity: boolean) => void;
+  onDistributeGroups: (
+    avoidSoloAffinity: boolean,
+    groupingMethod: "experience" | "random",
+  ) => void;
   onImportGroups: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -32,6 +35,9 @@ export function GroupConfiguration({
     attendeesCount > 0 ? Math.ceil(attendeesCount / numGroups) : 8,
   );
   const [avoidSoloAffinity, setAvoidSoloAffinity] = React.useState(true);
+  const [groupingMethod, setGroupingMethod] = React.useState<
+    "experience" | "random"
+  >("experience");
 
   React.useEffect(() => {
     if (attendeesCount > 0 && configMode === "count") {
@@ -121,6 +127,28 @@ export function GroupConfiguration({
           <h4 className="font-medium text-foreground mb-2">
             Distribution Options
           </h4>
+
+          <RadioGroup
+            value={groupingMethod}
+            onValueChange={(value) =>
+              setGroupingMethod(value as "experience" | "random")
+            }
+            className="mb-4"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="experience" id="experience" />
+              <Label htmlFor="experience" className="font-normal">
+                Group by experience level
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="random" id="random" />
+              <Label htmlFor="random" className="font-normal">
+                Group randomly
+              </Label>
+            </div>
+          </RadioGroup>
+
           <div className="flex items-center space-x-2">
             <Checkbox
               id="avoid-solo-affinity"
@@ -140,7 +168,9 @@ export function GroupConfiguration({
 
         <div className="flex flex-col sm:flex-row gap-2">
           <Button
-            onClick={() => onDistributeGroups(avoidSoloAffinity)}
+            onClick={() =>
+              onDistributeGroups(avoidSoloAffinity, groupingMethod)
+            }
             className="w-full sm:flex-[2]"
             disabled={attendeesCount === 0}
           >

@@ -27,13 +27,46 @@ export function AttendeeUpload({
     <Card>
       <CardHeader>
         <CardTitle>Upload Attendees CSV</CardTitle>
-        <CardDescription>
-          CSV should have columns: name, age, gender, isBIPOC, isLGBTQIA, and
-          either retreatExpCount (for number of retreats) or retreatExpDays (for
-          days)
-        </CardDescription>
+        <CardDescription>Required CSV columns:</CardDescription>
       </CardHeader>
       <CardContent>
+        <div className="mb-4 space-y-2">
+          <div className="flex flex-wrap gap-2">
+            <code className="px-2 py-1 bg-muted rounded-sm text-xs">name</code>
+            <code className="px-2 py-1 bg-muted rounded-sm text-xs">age</code>
+            <code className="px-2 py-1 bg-muted rounded-sm text-xs">
+              gender
+            </code>
+            <code className="px-2 py-1 bg-muted rounded-sm text-xs">
+              isBIPOC
+            </code>
+            <code className="px-2 py-1 bg-muted rounded-sm text-xs">
+              isLGBTQIA
+            </code>
+          </div>
+          <div className="text-sm text-muted-foreground">
+            Plus one of these for retreat experience:
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex items-center gap-2">
+              <code className="px-2 py-1 bg-muted rounded-sm text-xs">
+                retreatExpCount
+              </code>
+              <span className="text-xs text-muted-foreground">
+                for number of retreats
+              </span>
+            </div>
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              or
+            </div>
+            <div className="flex items-center gap-2">
+              <code className="px-2 py-1 bg-muted rounded-sm text-xs">
+                retreatExpDays
+              </code>
+              <span className="text-xs text-muted-foreground">for days</span>
+            </div>
+          </div>
+        </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-4">
           <div className="relative w-full sm:w-auto">
             <input

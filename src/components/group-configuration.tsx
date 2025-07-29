@@ -77,11 +77,15 @@ export function GroupConfiguration({
         >
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="count" id="count" />
-            <Label htmlFor="count">Specify number of groups</Label>
+            <Label htmlFor="count" className="font-normal">
+              Specify number of groups
+            </Label>
           </div>
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="size" id="size" />
-            <Label htmlFor="size">Specify group size</Label>
+            <Label htmlFor="size" className="font-normal">
+              Specify group size
+            </Label>
           </div>
         </RadioGroup>
 
@@ -123,50 +127,52 @@ export function GroupConfiguration({
           </div>
         )}
 
-        <div className="border-t pt-4 pb-4">
-          <h4 className="font-medium text-foreground mb-2">
-            Distribution Options
-          </h4>
-
-          <RadioGroup
-            value={groupingMethod}
-            onValueChange={(value) =>
-              setGroupingMethod(value as "experience" | "random")
-            }
-            className="mb-4"
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="experience" id="experience" />
-              <Label htmlFor="experience" className="font-normal">
-                Group by experience level
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="random" id="random" />
-              <Label htmlFor="random" className="font-normal">
-                Group randomly
-              </Label>
-            </div>
-          </RadioGroup>
-
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="avoid-solo-affinity"
-              checked={avoidSoloAffinity}
-              onCheckedChange={(checked) =>
-                setAvoidSoloAffinity(checked as boolean)
+        <div className="space-y-4 pt-4">
+          <div className="space-y-3">
+            <h4 className="font-medium text-foreground">Grouping Method</h4>
+            <RadioGroup
+              value={groupingMethod}
+              onValueChange={(value) =>
+                setGroupingMethod(value as "experience" | "random")
               }
-            />
-            <Label
-              htmlFor="avoid-solo-affinity"
-              className="text-sm font-normal cursor-pointer"
             >
-              Ensure no group has only 1 BIPOC or LGBTQIA+ member
-            </Label>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="experience" id="experience" />
+                <Label htmlFor="experience" className="font-normal">
+                  Group by experience level
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="random" id="random" />
+                <Label htmlFor="random" className="font-normal">
+                  Group randomly
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          <div className="pt-4">
+            <h4 className="font-medium text-foreground mb-3">Group Balance</h4>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="avoid-solo-affinity"
+                checked={avoidSoloAffinity}
+                onCheckedChange={(checked) =>
+                  setAvoidSoloAffinity(checked as boolean)
+                }
+              />
+              <Label
+                htmlFor="avoid-solo-affinity"
+                className="text-sm font-normal cursor-pointer"
+              >
+                Prevent anyone from being the only BIPOC or LGBTQIA+ member in
+                their group
+              </Label>
+            </div>
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 mt-6">
           <Button
             onClick={() =>
               onDistributeGroups(avoidSoloAffinity, groupingMethod)

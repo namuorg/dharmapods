@@ -20,6 +20,7 @@ import { AttendeeUpload } from "@/components/attendee-upload";
 import { GroupConfiguration } from "@/components/group-configuration";
 import { DistributionSummary } from "@/components/distribution-summary";
 import { OverallDemographics } from "@/components/overall-demographics";
+import { FieldVisibilitySelector } from "@/components/field-visibility-selector";
 import {
   Select,
   SelectContent,
@@ -37,6 +38,9 @@ export default function Home() {
   const [avoidSoloAffinity, setAvoidSoloAffinity] = useState(true);
   const [retreatExpUnit, setRetreatExpUnit] =
     useState<RetreatExpUnit>("retreats");
+  const [visibleFields, setVisibleFields] = useState<Set<string>>(
+    new Set(["bipoc", "lgbtqia", "gender", "experience", "age"]),
+  );
 
   const handleTeacherNameChange = (groupId: number, teacherName: string) => {
     setGroups((prevGroups) =>
@@ -262,6 +266,10 @@ export default function Home() {
                     </SelectContent>
                   </Select>
                 </div>
+                <FieldVisibilitySelector
+                  visibleFields={visibleFields}
+                  onVisibleFieldsChange={setVisibleFields}
+                />
                 {groups.some((g) => g.teacherName) && (
                   <div className="flex items-center gap-2">
                     <label
@@ -331,6 +339,7 @@ export default function Home() {
                       existingTeacherNames={existingTeacherNames}
                       avoidSoloAffinity={avoidSoloAffinity}
                       retreatExpUnit={retreatExpUnit}
+                      visibleFields={visibleFields}
                     />
                   );
                 })}

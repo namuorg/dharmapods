@@ -27,6 +27,7 @@ interface DraggableMemberProps {
     targetIndex?: number,
   ) => void;
   retreatExpUnit?: RetreatExpUnit;
+  visibleFields?: Set<string>;
 }
 
 export function DraggableMember({
@@ -35,6 +36,7 @@ export function DraggableMember({
   groupId,
   moveMemberBetweenGroups,
   retreatExpUnit = "retreats",
+  visibleFields = new Set(["bipoc", "lgbtqia", "gender", "experience", "age"]),
 }: DraggableMemberProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [isDraggedOver, setIsDraggedOver] = useState(false);
@@ -137,36 +139,51 @@ export function DraggableMember({
       >
         <div className="py-2 pl-2">{member.name}</div>
         <div className="flex items-stretch gap-2">
-          <div className="flex items-center gap-2 py-2">
-            {member.bipoc && <span title="BIPOC">🌍</span>}
-            {member.lgbtqia && <span title="LGBTQIA">🏳️‍🌈</span>}
-          </div>
+          {(visibleFields.has("bipoc") || visibleFields.has("lgbtqia")) && (
+            <div className="flex items-center gap-2 py-2">
+              {visibleFields.has("bipoc") && member.bipoc && (
+                <span title="BIPOC">🌍</span>
+              )}
+              {visibleFields.has("lgbtqia") && member.lgbtqia && (
+                <span title="LGBTQIA">🏳️‍🌈</span>
+              )}
+            </div>
+          )}
           <div className="flex items-stretch text-muted-foreground gap-2 text-xs">
-            <div
-              className={cn(
-                "w-8 px-1 flex items-center justify-center",
-                getGenderBackgroundColor(member.gender),
-              )}
-            >
-              {getGenderDisplay(member.gender)}
-            </div>
-            <div
-              className={cn(
-                "w-8 pr-2 flex items-center justify-end",
-                getExperienceGrayBorderColor(member.retreatExp, retreatExpUnit),
-              )}
-            >
-              {member.retreatExp}
-              {getRetreatExpSuffix(retreatExpUnit)}
-            </div>
-            <div
-              className={cn(
-                "w-8 pr-2 flex items-center justify-end",
-                getAgeGrayBorderColor(member.age),
-              )}
-            >
-              {member.age}
-            </div>
+            {visibleFields.has("gender") && (
+              <div
+                className={cn(
+                  "w-8 px-1 flex items-center justify-center",
+                  getGenderBackgroundColor(member.gender),
+                )}
+              >
+                {getGenderDisplay(member.gender)}
+              </div>
+            )}
+            {visibleFields.has("experience") && (
+              <div
+                className={cn(
+                  "w-8 pr-2 flex items-center justify-end",
+                  getExperienceGrayBorderColor(
+                    member.retreatExp,
+                    retreatExpUnit,
+                  ),
+                )}
+              >
+                {member.retreatExp}
+                {getRetreatExpSuffix(retreatExpUnit)}
+              </div>
+            )}
+            {visibleFields.has("age") && (
+              <div
+                className={cn(
+                  "w-8 pr-2 flex items-center justify-end",
+                  getAgeGrayBorderColor(member.age),
+                )}
+              >
+                {member.age}
+              </div>
+            )}
           </div>
         </div>
       </div>

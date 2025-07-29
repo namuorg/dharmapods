@@ -77,6 +77,7 @@ interface GroupCardProps {
   existingTeacherNames?: string[];
   avoidSoloAffinity?: boolean;
   retreatExpUnit?: RetreatExpUnit;
+  visibleFields?: Set<string>;
 }
 
 export const GroupCard = memo(function GroupCard({
@@ -87,6 +88,7 @@ export const GroupCard = memo(function GroupCard({
   existingTeacherNames = [],
   avoidSoloAffinity = true,
   retreatExpUnit = "retreats",
+  visibleFields = new Set(["bipoc", "lgbtqia", "gender", "experience", "age"]),
 }: GroupCardProps) {
   return (
     <Card>
@@ -114,6 +116,7 @@ export const GroupCard = memo(function GroupCard({
                 groupId={group.id}
                 moveMemberBetweenGroups={moveMemberBetweenGroups}
                 retreatExpUnit={retreatExpUnit}
+                visibleFields={visibleFields}
               />
             ))}
             {group.members.length === 0 && (

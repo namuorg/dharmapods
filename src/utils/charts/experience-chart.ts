@@ -19,13 +19,12 @@ export function getExperienceDistributionChartOptions(
   } else {
     experienceBins = {
       "0 days": 0,
-      "1-7 days": 0,
-      "8-14 days": 0,
-      "15-30 days": 0,
-      "31-90 days": 0,
-      "91-180 days": 0,
-      "181-365 days": 0,
-      "1+ years": 0,
+      "1-3 days": 0,
+      "4-10 days": 0,
+      "11-30 days": 0,
+      "31-60 days": 0,
+      "61-100 days": 0,
+      "100+ days": 0,
     };
   }
 
@@ -42,13 +41,12 @@ export function getExperienceDistributionChartOptions(
       else if (value >= 11) experienceBins["11+ retreats"]++;
     } else {
       if (value === 0) experienceBins["0 days"]++;
-      else if (value >= 1 && value <= 7) experienceBins["1-7 days"]++;
-      else if (value >= 8 && value <= 14) experienceBins["8-14 days"]++;
-      else if (value >= 15 && value <= 30) experienceBins["15-30 days"]++;
-      else if (value >= 31 && value <= 90) experienceBins["31-90 days"]++;
-      else if (value >= 91 && value <= 180) experienceBins["91-180 days"]++;
-      else if (value >= 181 && value <= 365) experienceBins["181-365 days"]++;
-      else if (value > 365) experienceBins["1+ years"]++;
+      else if (value >= 1 && value <= 3) experienceBins["1-3 days"]++;
+      else if (value >= 4 && value <= 10) experienceBins["4-10 days"]++;
+      else if (value >= 11 && value <= 30) experienceBins["11-30 days"]++;
+      else if (value >= 31 && value <= 60) experienceBins["31-60 days"]++;
+      else if (value >= 61 && value <= 100) experienceBins["61-100 days"]++;
+      else if (value > 100) experienceBins["100+ days"]++;
     }
   });
 

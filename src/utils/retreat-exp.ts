@@ -25,7 +25,7 @@ export function getRetreatExpRangeMax(unit: RetreatExpUnit): number {
   if (unit === "retreats") {
     return 10;
   } else if (unit === "days") {
-    return 30;
+    return 60;
   } else {
     assertUnreachable(unit);
   }

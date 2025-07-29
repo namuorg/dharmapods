@@ -240,77 +240,79 @@ export default function Home() {
               retreatExpUnit={retreatExpUnit}
             />
 
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Groups</h2>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <label
-                    htmlFor="sort-select"
-                    className="text-sm text-muted-foreground"
-                  >
-                    Sort by:
-                  </label>
-                  <Select
-                    value={sortBy}
-                    onValueChange={(value) => setSortBy(value as SortOption)}
-                  >
-                    <SelectTrigger
-                      id="sort-select"
-                      className="w-[180px] bg-white"
-                    >
-                      <SelectValue placeholder="Select sort option" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="name">Name</SelectItem>
-                      <SelectItem value="gender">Gender</SelectItem>
-                      <SelectItem value="experience">
-                        Retreat Experience
-                      </SelectItem>
-                      <SelectItem value="age">Age</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <FieldVisibilitySelector
-                  visibleFields={visibleFields}
-                  onVisibleFieldsChange={setVisibleFields}
-                />
-                {groups.some((g) => g.teacherName) && (
+            <div className="mb-4">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <h2 className="text-xl font-semibold">Groups</h2>
+                <div className="flex flex-wrap items-center gap-4">
                   <div className="flex items-center gap-2">
                     <label
-                      htmlFor="filter-select"
+                      htmlFor="sort-select"
                       className="text-sm text-muted-foreground"
                     >
-                      Filter:
+                      Sort by:
                     </label>
                     <Select
-                      value={filterByTeacher}
-                      onValueChange={setFilterByTeacher}
+                      value={sortBy}
+                      onValueChange={(value) => setSortBy(value as SortOption)}
                     >
                       <SelectTrigger
-                        id="filter-select"
+                        id="sort-select"
                         className="w-[180px] bg-white"
                       >
-                        <SelectValue placeholder="Select teacher" />
+                        <SelectValue placeholder="Select sort option" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All teachers</SelectItem>
-                        {Array.from(
-                          new Set(
-                            groups
-                              .filter((g) => g.teacherName)
-                              .map((g) => g.teacherName!),
-                          ),
-                        )
-                          .sort()
-                          .map((teacherName) => (
-                            <SelectItem key={teacherName} value={teacherName}>
-                              {teacherName}
-                            </SelectItem>
-                          ))}
+                        <SelectItem value="name">Name</SelectItem>
+                        <SelectItem value="gender">Gender</SelectItem>
+                        <SelectItem value="experience">
+                          Retreat Experience
+                        </SelectItem>
+                        <SelectItem value="age">Age</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                )}
+                  <FieldVisibilitySelector
+                    visibleFields={visibleFields}
+                    onVisibleFieldsChange={setVisibleFields}
+                  />
+                  {groups.some((g) => g.teacherName) && (
+                    <div className="flex items-center gap-2">
+                      <label
+                        htmlFor="filter-select"
+                        className="text-sm text-muted-foreground"
+                      >
+                        Filter:
+                      </label>
+                      <Select
+                        value={filterByTeacher}
+                        onValueChange={setFilterByTeacher}
+                      >
+                        <SelectTrigger
+                          id="filter-select"
+                          className="w-[180px] bg-white"
+                        >
+                          <SelectValue placeholder="Select teacher" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All teachers</SelectItem>
+                          {Array.from(
+                            new Set(
+                              groups
+                                .filter((g) => g.teacherName)
+                                .map((g) => g.teacherName!),
+                            ),
+                          )
+                            .sort()
+                            .map((teacherName) => (
+                              <SelectItem key={teacherName} value={teacherName}>
+                                {teacherName}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 

@@ -1,24 +1,22 @@
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Group, Attendee } from "@/types";
+import { useAppStore } from "@/store/app-store";
+import { exportGroupsToCSV } from "@/utils/csv";
 
-interface DistributionSummaryProps {
-  groups: Group[];
-  attendees: Attendee[];
-  onExportGroups: () => void;
-}
+export function DistributionSummary() {
+  const { groups, attendees, retreatExpUnit } = useAppStore();
 
-export function DistributionSummary({
-  groups,
-  attendees,
-  onExportGroups,
-}: DistributionSummaryProps) {
+  const handleExportGroups = () => {
+    exportGroupsToCSV(groups, retreatExpUnit);
+  };
   return (
     <Card>
       <CardHeader>
         <div className="flex justify-between items-center">
           <CardTitle>Distribution Summary</CardTitle>
-          <Button onClick={onExportGroups} variant="default">
+          <Button onClick={handleExportGroups} variant="default">
             Export Groups CSV
           </Button>
         </div>

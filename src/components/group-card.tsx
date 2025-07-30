@@ -7,8 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { DraggableMember } from "./draggable-member";
 import { EmptyDropZone } from "./empty-drop-zone";
 import { TeacherCombobox } from "./teacher-combobox";
-import { Group, RetreatExpUnit } from "@/types";
+import { Group } from "@/types";
 import { getRetreatExpSuffix } from "@/utils/retreat-exp";
+import { useAppStore } from "@/store/app-store";
 
 interface NotesTextareaProps {
   value: string | undefined;
@@ -66,30 +67,21 @@ function NotesTextarea({ value, onChange, placeholder }: NotesTextareaProps) {
 
 interface GroupCardProps {
   group: Group;
-  moveMemberBetweenGroups: (
-    memberId: string,
-    sourceGroupId: number,
-    targetGroupId: number,
-    targetIndex?: number,
-  ) => void;
-  onTeacherNameChange: (groupId: number, teacherName: string) => void;
-  onNotesChange: (groupId: number, notes: string) => void;
   existingTeacherNames?: string[];
-  avoidSoloAffinity?: boolean;
-  retreatExpUnit?: RetreatExpUnit;
-  visibleFields?: Set<string>;
 }
 
 export const GroupCard = memo(function GroupCard({
   group,
-  moveMemberBetweenGroups,
-  onTeacherNameChange,
-  onNotesChange,
   existingTeacherNames = [],
-  avoidSoloAffinity = true,
-  retreatExpUnit = "retreats",
-  visibleFields = new Set(["bipoc", "lgbtqia", "gender", "experience", "age"]),
 }: GroupCardProps) {
+  const {
+    avoidSoloAffinity,
+    retreatExpUnit,
+    visibleFields,
+    moveMemberBetweenGroups,
+    updateGroupTeacherName,
+    updateGroupNotes,
+  } = useAppStore();
   return (
     <Card>
       <CardHeader>
@@ -97,7 +89,7 @@ export const GroupCard = memo(function GroupCard({
         <div className="mt-2">
           <TeacherCombobox
             value={group.teacherName}
-            onChange={(value) => onTeacherNameChange(group.id, value)}
+            onChange={(value) => updateGroupTeacherName(group.id, value)}
             existingTeacherNames={existingTeacherNames}
           />
         </div>
@@ -186,7 +178,7 @@ export const GroupCard = memo(function GroupCard({
           <NotesTextarea
             placeholder="Add notes about this group..."
             value={group.notes}
-            onChange={(value) => onNotesChange(group.id, value)}
+            onChange={(value) => updateGroupNotes(group.id, value)}
           />
         </div>
       </CardContent>

@@ -1,19 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
+import { useAppStore } from "@/store/app-store";
 
-import {
-  Attendee,
-  Group,
-  DEFAULT_NUMBER_OF_GROUPS,
-  RetreatExpUnit,
-} from "@/types";
-import { parseCSV, exportGroupsToCSV, parseGroupsCSV } from "@/utils/csv";
-import {
-  distributeIntoGroups,
-  calculateGroupDemographics,
-} from "@/utils/group-distribution";
 import { sortMembers, SortOption } from "@/utils/sort";
 import { GroupCard } from "@/components/group-card";
 import { AttendeeUpload } from "@/components/attendee-upload";
@@ -29,12 +18,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-interface SortSelectorProps {
-  sortBy: SortOption;
-  onSortChange: (value: SortOption) => void;
-}
-
-function SortSelector({ sortBy, onSortChange }: SortSelectorProps) {
+function SortSelector() {
+  const { sortBy, setSortBy } = useAppStore();
   return (
     <div className="flex items-center gap-2">
       <label htmlFor="sort-select" className="text-sm text-muted-foreground">
@@ -42,7 +27,7 @@ function SortSelector({ sortBy, onSortChange }: SortSelectorProps) {
       </label>
       <Select
         value={sortBy}
-        onValueChange={(value) => onSortChange(value as SortOption)}
+        onValueChange={(value) => setSortBy(value as SortOption)}
       >
         <SelectTrigger id="sort-select" className="w-[180px] bg-white">
           <SelectValue placeholder="Select sort option" />
@@ -58,23 +43,14 @@ function SortSelector({ sortBy, onSortChange }: SortSelectorProps) {
   );
 }
 
-interface TeacherFilterProps {
-  filterByTeacher: string;
-  onFilterChange: (value: string) => void;
-  teacherNames: string[];
-}
-
-function TeacherFilter({
-  filterByTeacher,
-  onFilterChange,
-  teacherNames,
-}: TeacherFilterProps) {
+function TeacherFilter({ teacherNames }: { teacherNames: string[] }) {
+  const { filterByTeacher, setFilterByTeacher } = useAppStore();
   return (
     <div className="flex items-center gap-2">
       <label htmlFor="filter-select" className="text-sm text-muted-foreground">
         Filter:
       </label>
-      <Select value={filterByTeacher} onValueChange={onFilterChange}>
+      <Select value={filterByTeacher} onValueChange={setFilterByTeacher}>
         <SelectTrigger id="filter-select" className="w-[180px] bg-white">
           <SelectValue placeholder="Select teacher" />
         </SelectTrigger>
@@ -91,44 +67,20 @@ function TeacherFilter({
   );
 }
 
-interface GroupsHeaderProps {
-  sortBy: SortOption;
-  onSortChange: (value: SortOption) => void;
-  filterByTeacher: string;
-  onFilterChange: (value: string) => void;
-  teacherNames: string[];
-  visibleFields: Set<string>;
-  onVisibleFieldsChange: (fields: Set<string>) => void;
-  showTeacherFilter: boolean;
-}
-
-function GroupsHeader({
-  sortBy,
-  onSortChange,
-  filterByTeacher,
-  onFilterChange,
-  teacherNames,
-  visibleFields,
-  onVisibleFieldsChange,
-  showTeacherFilter,
-}: GroupsHeaderProps) {
+function GroupsHeader() {
+  const { groups } = useAppStore();
+  const teacherNames = Array.from(
+    new Set(groups.filter((g) => g.teacherName).map((g) => g.teacherName!)),
+  );
+  const showTeacherFilter = groups.some((g) => g.teacherName);
   return (
     <div className="mb-4">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <h2 className="text-xl font-semibold">Groups</h2>
         <div className="flex flex-wrap items-center gap-4">
-          <SortSelector sortBy={sortBy} onSortChange={onSortChange} />
-          <FieldVisibilitySelector
-            visibleFields={visibleFields}
-            onVisibleFieldsChange={onVisibleFieldsChange}
-          />
-          {showTeacherFilter && (
-            <TeacherFilter
-              filterByTeacher={filterByTeacher}
-              onFilterChange={onFilterChange}
-              teacherNames={teacherNames}
-            />
-          )}
+          <SortSelector />
+          <FieldVisibilitySelector />
+          {showTeacherFilter && <TeacherFilter teacherNames={teacherNames} />}
         </div>
       </div>
     </div>
@@ -136,162 +88,7 @@ function GroupsHeader({
 }
 
 export default function Home() {
-  const [attendees, setAttendees] = useState<Attendee[]>([]);
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [numGroups, setNumGroups] = useState(DEFAULT_NUMBER_OF_GROUPS);
-  const [sortBy, setSortBy] = useState<SortOption>("name");
-  const [filterByTeacher, setFilterByTeacher] = useState<string>("all");
-  const [avoidSoloAffinity, setAvoidSoloAffinity] = useState(true);
-  const [retreatExpUnit, setRetreatExpUnit] =
-    useState<RetreatExpUnit>("retreats");
-  const [visibleFields, setVisibleFields] = useState<Set<string>>(
-    new Set(["bipoc", "lgbtqia", "gender", "experience", "age"]),
-  );
-
-  const handleTeacherNameChange = (groupId: number, teacherName: string) => {
-    setGroups((prevGroups) =>
-      prevGroups.map((group) =>
-        group.id === groupId ? { ...group, teacherName } : group,
-      ),
-    );
-  };
-
-  const handleNotesChange = (groupId: number, notes: string) => {
-    setGroups((prevGroups) =>
-      prevGroups.map((group) =>
-        group.id === groupId ? { ...group, notes } : group,
-      ),
-    );
-  };
-
-  const moveMemberBetweenGroups = (
-    memberId: string,
-    sourceGroupId: number,
-    targetGroupId: number,
-    targetIndex?: number,
-  ) => {
-    setGroups((prevGroups) => {
-      const newGroups = [...prevGroups];
-      const sourceGroup = newGroups.find((g) => g.id === sourceGroupId);
-      const targetGroup = newGroups.find((g) => g.id === targetGroupId);
-
-      if (!sourceGroup || !targetGroup) return prevGroups;
-
-      const memberIndex = sourceGroup.members.findIndex(
-        (m) => m.id === memberId,
-      );
-      if (memberIndex === -1) return prevGroups;
-
-      const memberToMove = sourceGroup.members[memberIndex];
-
-      // Remove from source
-      sourceGroup.members.splice(memberIndex, 1);
-
-      // Add to target at specific position
-      if (targetIndex !== undefined) {
-        // If moving within the same group, adjust index if needed
-        const adjustedIndex =
-          sourceGroupId === targetGroupId && targetIndex > memberIndex
-            ? targetIndex - 1
-            : targetIndex;
-        targetGroup.members.splice(adjustedIndex, 0, memberToMove);
-      } else {
-        // Default behavior: add to end
-        targetGroup.members.push(memberToMove);
-      }
-
-      sourceGroup.demographics = calculateGroupDemographics(
-        sourceGroup.members,
-      );
-      targetGroup.demographics = calculateGroupDemographics(
-        targetGroup.members,
-      );
-
-      return newGroups;
-    });
-  };
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const csvText = e.target?.result as string;
-        const { attendees: parsedAttendees, retreatExpUnit } =
-          parseCSV(csvText);
-        setAttendees(parsedAttendees);
-        setRetreatExpUnit(retreatExpUnit);
-      };
-      reader.readAsText(file);
-    }
-  };
-
-  const handleDistributeGroups = (
-    avoidSolo: boolean,
-    groupingMethod: "experience" | "random",
-  ) => {
-    setAvoidSoloAffinity(avoidSolo);
-    if (attendees.length > 0) {
-      const distributedGroups = distributeIntoGroups({
-        attendees,
-        numGroups,
-        avoidSoloAffinity: avoidSolo,
-        groupingMethod,
-      });
-      setGroups(distributedGroups);
-    }
-  };
-
-  const handleLoadSampleData = async () => {
-    try {
-      const response = await fetch("/sample-attendees.csv");
-      const csvText = await response.text();
-      const { attendees: parsedAttendees, retreatExpUnit } = parseCSV(csvText);
-      setAttendees(parsedAttendees);
-      setRetreatExpUnit(retreatExpUnit);
-      setGroups([]);
-    } catch (error) {
-      console.error("Error loading sample data:", error);
-    }
-  };
-
-  const handleDownloadTemplate = async () => {
-    try {
-      const response = await fetch("/sample-attendees.csv");
-      const csvText = await response.text();
-      const blob = new Blob([csvText], { type: "text/csv" });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "attendees-template.csv";
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error("Error downloading template:", error);
-    }
-  };
-
-  const handleExportGroups = () => {
-    exportGroupsToCSV(groups, retreatExpUnit);
-  };
-
-  const handleImportGroups = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const csvText = e.target?.result as string;
-        const importedGroups = parseGroupsCSV(csvText);
-        setGroups(importedGroups);
-        // Also set attendees based on imported groups
-        const allAttendees = importedGroups.flatMap((group) => group.members);
-        setAttendees(allAttendees);
-      };
-      reader.readAsText(file);
-    }
-  };
+  const { groups, sortBy, filterByTeacher } = useAppStore();
 
   return (
     <div className="min-h-screen bg-background p-8">
@@ -316,53 +113,15 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          <AttendeeUpload
-            attendeesCount={attendees.length}
-            onFileUpload={handleFileUpload}
-            onLoadSampleData={handleLoadSampleData}
-            onDownloadTemplate={handleDownloadTemplate}
-            retreatExpUnit={retreatExpUnit}
-          />
-
-          <GroupConfiguration
-            numGroups={numGroups}
-            attendeesCount={attendees.length}
-            onNumGroupsChange={setNumGroups}
-            onDistributeGroups={handleDistributeGroups}
-            onImportGroups={handleImportGroups}
-          />
+          <AttendeeUpload />
+          <GroupConfiguration />
         </div>
 
         {groups.length > 0 && (
           <div className="space-y-6">
-            <DistributionSummary
-              groups={groups}
-              attendees={attendees}
-              onExportGroups={handleExportGroups}
-            />
-
-            <OverallDemographics
-              attendees={attendees}
-              retreatExpUnit={retreatExpUnit}
-            />
-
-            <GroupsHeader
-              sortBy={sortBy}
-              onSortChange={setSortBy}
-              filterByTeacher={filterByTeacher}
-              onFilterChange={setFilterByTeacher}
-              teacherNames={Array.from(
-                new Set(
-                  groups
-                    .filter((g) => g.teacherName)
-                    .map((g) => g.teacherName!),
-                ),
-              )}
-              visibleFields={visibleFields}
-              onVisibleFieldsChange={setVisibleFields}
-              showTeacherFilter={groups.some((g) => g.teacherName)}
-            />
-
+            <DistributionSummary />
+            <OverallDemographics />
+            <GroupsHeader />
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {groups
                 .filter((group) => {
@@ -386,13 +145,7 @@ export default function Home() {
                     <GroupCard
                       key={group.id}
                       group={sortedGroup}
-                      moveMemberBetweenGroups={moveMemberBetweenGroups}
-                      onTeacherNameChange={handleTeacherNameChange}
-                      onNotesChange={handleNotesChange}
                       existingTeacherNames={existingTeacherNames}
-                      avoidSoloAffinity={avoidSoloAffinity}
-                      retreatExpUnit={retreatExpUnit}
-                      visibleFields={visibleFields}
                     />
                   );
                 })}

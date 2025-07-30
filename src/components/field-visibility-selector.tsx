@@ -8,11 +8,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Settings2Icon } from "lucide-react";
-
-interface FieldVisibilitySelectorProps {
-  visibleFields: Set<string>;
-  onVisibleFieldsChange: (fields: Set<string>) => void;
-}
+import { useAppStore } from "@/store/app-store";
 
 const FIELD_OPTIONS = [
   { id: "age", label: "Age" },
@@ -22,10 +18,8 @@ const FIELD_OPTIONS = [
   { id: "lgbtqia", label: "LGBTQIA+" },
 ];
 
-export function FieldVisibilitySelector({
-  visibleFields,
-  onVisibleFieldsChange,
-}: FieldVisibilitySelectorProps) {
+export function FieldVisibilitySelector() {
+  const { visibleFields, setVisibleFields } = useAppStore();
   const handleFieldToggle = (fieldId: string) => {
     const newFields = new Set(visibleFields);
     if (newFields.has(fieldId)) {
@@ -33,15 +27,15 @@ export function FieldVisibilitySelector({
     } else {
       newFields.add(fieldId);
     }
-    onVisibleFieldsChange(newFields);
+    setVisibleFields(newFields);
   };
 
   const handleSelectAll = () => {
-    onVisibleFieldsChange(new Set(FIELD_OPTIONS.map((field) => field.id)));
+    setVisibleFields(new Set(FIELD_OPTIONS.map((field) => field.id)));
   };
 
   const handleSelectNone = () => {
-    onVisibleFieldsChange(new Set());
+    setVisibleFields(new Set());
   };
 
   return (

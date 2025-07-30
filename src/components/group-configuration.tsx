@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardContent,
@@ -10,36 +12,31 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import React from "react";
+import { useEffect, useState } from "react";
+import { useAppStore } from "@/store/app-store";
+import { distributeIntoGroups } from "@/utils/group-distribution";
+import { parseGroupsCSV } from "@/utils/csv";
 
-interface GroupConfigurationProps {
-  numGroups: number;
-  attendeesCount: number;
-  onNumGroupsChange: (count: number) => void;
-  onDistributeGroups: (
-    avoidSoloAffinity: boolean,
-    groupingMethod: "experience" | "random",
-  ) => void;
-  onImportGroups: (event: React.ChangeEvent<HTMLInputElement>) => void;
-}
-
-export function GroupConfiguration({
-  numGroups,
-  attendeesCount,
-  onNumGroupsChange,
-  onDistributeGroups,
-  onImportGroups,
-}: GroupConfigurationProps) {
-  const [configMode, setConfigMode] = React.useState<"count" | "size">("count");
-  const [groupSize, setGroupSize] = React.useState(
+export function GroupConfiguration() {
+  const {
+    attendees,
+    numGroups,
+    setNumGroups,
+    setGroups,
+    setAttendees,
+    setAvoidSoloAffinity,
+  } = useAppStore();
+  const attendeesCount = attendees.length;
+  const [configMode, setConfigMode] = useState<"count" | "size">("count");
+  const [groupSize, setGroupSize] = useState(
     attendeesCount > 0 ? Math.ceil(attendeesCount / numGroups) : 8,
   );
-  const [avoidSoloAffinity, setAvoidSoloAffinity] = React.useState(true);
-  const [groupingMethod, setGroupingMethod] = React.useState<
-    "experience" | "random"
-  >("experience");
+  const [localAvoidSoloAffinity, setLocalAvoidSoloAffinity] = useState(true);
+  const [groupingMethod, setGroupingMethod] = useState<"experience" | "random">(
+    "experience",
+  );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (attendeesCount > 0 && configMode === "count") {
       setGroupSize(Math.ceil(attendeesCount / numGroups));
     }
@@ -49,7 +46,7 @@ export function GroupConfiguration({
     setConfigMode(mode);
     if (mode === "size" && attendeesCount > 0) {
       const calculatedGroups = Math.ceil(attendeesCount / groupSize);
-      onNumGroupsChange(calculatedGroups);
+      setNumGroups(calculatedGroups);
     }
   };
 
@@ -57,7 +54,7 @@ export function GroupConfiguration({
     setGroupSize(value);
     if (attendeesCount > 0) {
       const calculatedGroups = Math.ceil(attendeesCount / value);
-      onNumGroupsChange(calculatedGroups);
+      setNumGroups(calculatedGroups);
     }
   };
 
@@ -116,7 +113,7 @@ export function GroupConfiguration({
               id="numberOfGroups"
               type="number"
               value={isNaN(numGroups) ? "" : numGroups}
-              onChange={(e) => onNumGroupsChange(parseInt(e.target.value))}
+              onChange={(e) => setNumGroups(parseInt(e.target.value))}
               className="w-16"
             />
             {attendeesCount > 0 && !isNaN(numGroups) && (
@@ -156,9 +153,9 @@ export function GroupConfiguration({
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="avoid-solo-affinity"
-                checked={avoidSoloAffinity}
+                checked={localAvoidSoloAffinity}
                 onCheckedChange={(checked) =>
-                  setAvoidSoloAffinity(checked as boolean)
+                  setLocalAvoidSoloAffinity(checked as boolean)
                 }
               />
               <Label
@@ -174,9 +171,18 @@ export function GroupConfiguration({
 
         <div className="flex flex-col sm:flex-row gap-2 mt-6">
           <Button
-            onClick={() =>
-              onDistributeGroups(avoidSoloAffinity, groupingMethod)
-            }
+            onClick={() => {
+              setAvoidSoloAffinity(localAvoidSoloAffinity);
+              if (attendees.length > 0) {
+                const distributedGroups = distributeIntoGroups({
+                  attendees,
+                  numGroups,
+                  avoidSoloAffinity: localAvoidSoloAffinity,
+                  groupingMethod,
+                });
+                setGroups(distributedGroups);
+              }
+            }}
             className="w-full sm:flex-[2]"
             disabled={attendeesCount === 0}
           >
@@ -186,7 +192,23 @@ export function GroupConfiguration({
             <input
               type="file"
               accept=".csv"
-              onChange={onImportGroups}
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = (e) => {
+                    const csvText = e.target?.result as string;
+                    const importedGroups = parseGroupsCSV(csvText);
+                    setGroups(importedGroups);
+                    // Also set attendees based on imported groups
+                    const allAttendees = importedGroups.flatMap(
+                      (group) => group.members,
+                    );
+                    setAttendees(allAttendees);
+                  };
+                  reader.readAsText(file);
+                }
+              }}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               id="groups-import"
             />

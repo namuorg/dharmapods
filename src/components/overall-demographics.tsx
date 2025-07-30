@@ -4,19 +4,12 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import ReactECharts from "echarts-for-react";
-import { Attendee, RetreatExpUnit } from "@/types";
+import { useAppStore } from "@/store/app-store";
 import { getAgeDistributionChartOptions } from "@/utils/charts/age-chart";
 import { getExperienceDistributionChartOptions } from "@/utils/charts/experience-chart";
 
-interface OverallDemographicsProps {
-  attendees: Attendee[];
-  retreatExpUnit?: RetreatExpUnit;
-}
-
-export function OverallDemographics({
-  attendees,
-  retreatExpUnit = "retreats",
-}: OverallDemographicsProps) {
+export function OverallDemographics() {
+  const { attendees, retreatExpUnit } = useAppStore();
   const [showAgeChart, setShowAgeChart] = useState(false);
   const [showExperienceChart, setShowExperienceChart] = useState(false);
 
@@ -73,7 +66,7 @@ export function OverallDemographics({
               Avg Retreat Experience
             </h3>
             <p className="text-2xl font-bold text-slate-700">
-              {avgExperience} {retreatExpUnit}
+              {avgExperience} {retreatExpUnit || "retreats"}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               Click to view distribution

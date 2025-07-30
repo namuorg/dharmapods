@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardContent,
@@ -6,23 +8,64 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RetreatExpUnit } from "@/types";
+import { useAppStore } from "@/store/app-store";
+import { parseCSV } from "@/utils/csv";
 
-interface AttendeeUploadProps {
-  attendeesCount: number;
-  onFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onLoadSampleData: () => void;
-  onDownloadTemplate: () => void;
-  retreatExpUnit: RetreatExpUnit;
-}
+export function AttendeeUpload() {
+  const {
+    attendees,
+    retreatExpUnit,
+    setAttendees,
+    setRetreatExpUnit,
+    setGroups,
+  } = useAppStore();
+  const attendeesCount = attendees.length;
 
-export function AttendeeUpload({
-  attendeesCount,
-  onFileUpload,
-  onLoadSampleData,
-  onDownloadTemplate,
-  retreatExpUnit,
-}: AttendeeUploadProps) {
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const csvText = e.target?.result as string;
+        const { attendees: parsedAttendees, retreatExpUnit } =
+          parseCSV(csvText);
+        setAttendees(parsedAttendees);
+        setRetreatExpUnit(retreatExpUnit);
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const handleLoadSampleData = async () => {
+    try {
+      const response = await fetch("/sample-attendees.csv");
+      const csvText = await response.text();
+      const { attendees: parsedAttendees, retreatExpUnit } = parseCSV(csvText);
+      setAttendees(parsedAttendees);
+      setRetreatExpUnit(retreatExpUnit);
+      setGroups([]);
+    } catch (error) {
+      console.error("Error loading sample data:", error);
+    }
+  };
+
+  const handleDownloadTemplate = async () => {
+    try {
+      const response = await fetch("/sample-attendees.csv");
+      const csvText = await response.text();
+      const blob = new Blob([csvText], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "attendees-template.csv";
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Error downloading template:", error);
+    }
+  };
   return (
     <Card>
       <CardHeader>
@@ -72,7 +115,7 @@ export function AttendeeUpload({
             <input
               type="file"
               accept=".csv"
-              onChange={onFileUpload}
+              onChange={handleFileUpload}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               id="csv-upload"
             />
@@ -83,14 +126,14 @@ export function AttendeeUpload({
             </Button>
           </div>
           <Button
-            onClick={onLoadSampleData}
+            onClick={handleLoadSampleData}
             variant="outline"
             className="w-full sm:w-auto bg-white"
           >
             Use Sample Data
           </Button>
           <Button
-            onClick={onDownloadTemplate}
+            onClick={handleDownloadTemplate}
             variant="outline"
             className="w-full sm:w-auto bg-muted"
           >

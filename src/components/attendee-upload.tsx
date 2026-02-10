@@ -12,13 +12,7 @@ import { useAppStore } from "@/store/app-store";
 import { parseCSV } from "@/utils/csv";
 
 export function AttendeeUpload() {
-  const {
-    attendees,
-    retreatExpUnit,
-    setAttendees,
-    setRetreatExpUnit,
-    setGroups,
-  } = useAppStore();
+  const { attendees, setAttendees, setGroups } = useAppStore();
   const attendeesCount = attendees.length;
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,10 +21,8 @@ export function AttendeeUpload() {
       const reader = new FileReader();
       reader.onload = (e) => {
         const csvText = e.target?.result as string;
-        const { attendees: parsedAttendees, retreatExpUnit } =
-          parseCSV(csvText);
+        const parsedAttendees = parseCSV(csvText);
         setAttendees(parsedAttendees);
-        setRetreatExpUnit(retreatExpUnit);
       };
       reader.readAsText(file);
     }
@@ -40,9 +32,8 @@ export function AttendeeUpload() {
     try {
       const response = await fetch("/sample-attendees.csv");
       const csvText = await response.text();
-      const { attendees: parsedAttendees, retreatExpUnit } = parseCSV(csvText);
+      const parsedAttendees = parseCSV(csvText);
       setAttendees(parsedAttendees);
-      setRetreatExpUnit(retreatExpUnit);
       setGroups([]);
     } catch (error) {
       console.error("Error loading sample data:", error);
@@ -86,28 +77,9 @@ export function AttendeeUpload() {
             <code className="px-2 py-1 bg-muted rounded-sm text-xs">
               isLGBTQIA
             </code>
-          </div>
-          <div className="text-sm text-muted-foreground">
-            Plus one of these for retreat experience:
-          </div>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <div className="flex items-center gap-2">
-              <code className="px-2 py-1 bg-muted rounded-sm text-xs">
-                retreatExpCount
-              </code>
-              <span className="text-xs text-muted-foreground">
-                for number of retreats
-              </span>
-            </div>
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              or
-            </div>
-            <div className="flex items-center gap-2">
-              <code className="px-2 py-1 bg-muted rounded-sm text-xs">
-                retreatExpDays
-              </code>
-              <span className="text-xs text-muted-foreground">for days</span>
-            </div>
+            <code className="px-2 py-1 bg-muted rounded-sm text-xs">
+              retreatExpCount
+            </code>
           </div>
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-4">
@@ -142,15 +114,9 @@ export function AttendeeUpload() {
         </div>
 
         {attendeesCount > 0 && (
-          <div className="space-y-1">
-            <p className="text-green-600 font-medium">
-              {attendeesCount} attendees loaded
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Experience unit:{" "}
-              {retreatExpUnit === "retreats" ? "Number of retreats" : "Days"}
-            </p>
-          </div>
+          <p className="text-green-600 font-medium">
+            {attendeesCount} attendees loaded
+          </p>
         )}
       </CardContent>
     </Card>

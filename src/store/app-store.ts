@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Attendee, Group, RetreatExpUnit } from "@/types";
+import { Attendee, Group } from "@/types";
 import { SortOption } from "@/utils/sort";
 import { DEFAULT_NUMBER_OF_GROUPS } from "@/types";
 import { calculateGroupDemographics } from "@/utils/group-distribution";
@@ -12,7 +12,6 @@ interface AppState {
   sortBy: SortOption;
   filterByTeacher: string;
   avoidSoloAffinity: boolean;
-  retreatExpUnit: RetreatExpUnit;
   visibleFields: Set<string>;
 
   // Actions
@@ -22,7 +21,6 @@ interface AppState {
   setSortBy: (sortBy: SortOption) => void;
   setFilterByTeacher: (filter: string) => void;
   setAvoidSoloAffinity: (avoid: boolean) => void;
-  setRetreatExpUnit: (unit: RetreatExpUnit) => void;
   setVisibleFields: (fields: Set<string>) => void;
   updateGroup: (groupId: number, updates: Partial<Group>) => void;
   updateGroupTeacherName: (groupId: number, teacherName: string) => void;
@@ -43,7 +41,6 @@ export const useAppStore = create<AppState>((set) => ({
   sortBy: "name",
   filterByTeacher: "all",
   avoidSoloAffinity: true,
-  retreatExpUnit: "retreats",
   visibleFields: new Set(["bipoc", "lgbtqia", "gender", "experience", "age"]),
 
   // Actions
@@ -53,7 +50,6 @@ export const useAppStore = create<AppState>((set) => ({
   setSortBy: (sortBy) => set({ sortBy }),
   setFilterByTeacher: (filterByTeacher) => set({ filterByTeacher }),
   setAvoidSoloAffinity: (avoidSoloAffinity) => set({ avoidSoloAffinity }),
-  setRetreatExpUnit: (retreatExpUnit) => set({ retreatExpUnit }),
   setVisibleFields: (visibleFields) => set({ visibleFields }),
 
   updateGroup: (groupId, updates) =>

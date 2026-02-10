@@ -9,12 +9,9 @@ import {
   attachClosestEdge,
   extractClosestEdge,
 } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
-import { Attendee, RetreatExpUnit } from "@/types";
+import { Attendee, RetreatExpLevel } from "@/types";
 import { cn } from "@/lib/utils";
-import {
-  getRetreatExpSuffix,
-  getRetreatExpRangeMax,
-} from "@/utils/retreat-exp";
+import { getRetreatExpColorIndex } from "@/utils/retreat-exp";
 
 interface DraggableMemberProps {
   member: Attendee;
@@ -26,7 +23,6 @@ interface DraggableMemberProps {
     targetGroupId: number,
     targetIndex?: number,
   ) => void;
-  retreatExpUnit?: RetreatExpUnit;
   visibleFields?: Set<string>;
 }
 
@@ -35,7 +31,6 @@ export function DraggableMember({
   memberIndex,
   groupId,
   moveMemberBetweenGroups,
-  retreatExpUnit = "retreats",
   visibleFields = new Set(["bipoc", "lgbtqia", "gender", "experience", "age"]),
 }: DraggableMemberProps) {
   const ref = useRef<HTMLDivElement>(null);
@@ -163,15 +158,11 @@ export function DraggableMember({
             {visibleFields.has("experience") && (
               <div
                 className={cn(
-                  "w-8 pr-2 flex items-center justify-end",
-                  getExperienceGrayBorderColor(
-                    member.retreatExp,
-                    retreatExpUnit,
-                  ),
+                  "w-10 pr-2 flex items-center justify-end",
+                  getExperienceGrayBorderColor(member.retreatExp),
                 )}
               >
                 {member.retreatExp}
-                {getRetreatExpSuffix(retreatExpUnit)}
               </div>
             )}
             {visibleFields.has("age") && (
@@ -235,33 +226,15 @@ function getAgeGrayBorderColor(age: number): string {
   return `border-r-4 ${steps[stepIndex]}`;
 }
 
-function getExperienceGrayBorderColor(
-  retreatExp: number,
-  unit: RetreatExpUnit,
-): string {
-  const EXPERIENCE_RANGE_MIN = 0;
-  const EXPERIENCE_RANGE_MAX = getRetreatExpRangeMax(unit);
-
-  const percent = Math.min(
-    1,
-    Math.max(
-      0,
-      (retreatExp - EXPERIENCE_RANGE_MIN) /
-        (EXPERIENCE_RANGE_MAX - EXPERIENCE_RANGE_MIN),
-    ),
-  );
+function getExperienceGrayBorderColor(retreatExp: RetreatExpLevel): string {
+  const colorIndex = getRetreatExpColorIndex(retreatExp);
   const steps = [
-    "border-gray-200",
     "border-gray-300",
-    "border-gray-400",
     "border-gray-500",
-    "border-gray-600",
     "border-gray-700",
-    "border-gray-800",
     "border-gray-900",
   ];
-  const stepIndex = Math.floor(percent * (steps.length - 1));
-  return `border-r-4 ${steps[stepIndex]}`;
+  return `border-r-4 ${steps[colorIndex]}`;
 }
 
 function getGenderBackgroundColor(gender: string): string {

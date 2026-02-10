@@ -6,10 +6,10 @@ import { useAppStore } from "@/store/app-store";
 import { exportGroupsToCSV } from "@/utils/csv";
 
 export function DistributionSummary() {
-  const { groups, attendees, retreatExpUnit } = useAppStore();
+  const { groups, attendees } = useAppStore();
 
   const handleExportGroups = () => {
-    exportGroupsToCSV(groups, retreatExpUnit);
+    exportGroupsToCSV(groups);
   };
   return (
     <Card>

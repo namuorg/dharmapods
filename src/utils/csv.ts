@@ -1,27 +1,21 @@
 import Papa from "papaparse";
-import { Attendee, Group, RetreatExpUnit } from "@/types";
+import { Attendee, Group, RetreatExpLevel, RETREAT_EXP_LEVELS } from "@/types";
+import { getRetreatExpNumericValue, numericToRetreatExpLevel } from "./retreat-exp";
 
-export interface ParseCSVResult {
-  attendees: Attendee[];
-  retreatExpUnit: RetreatExpUnit;
+function parseRetreatExp(value: string | undefined): RetreatExpLevel {
+  const trimmed = value?.trim() || "0";
+  if (RETREAT_EXP_LEVELS.includes(trimmed as RetreatExpLevel)) {
+    return trimmed as RetreatExpLevel;
+  }
+  return "0";
 }
 
-export function parseCSV(csvText: string): ParseCSVResult {
+export function parseCSV(csvText: string): Attendee[] {
   const result = Papa.parse<Record<string, string>>(csvText, {
     header: true,
     skipEmptyLines: true,
     transformHeader: (header) => header.trim(),
   });
-
-  // Detect unit from header
-  let retreatExpUnit: RetreatExpUnit = "retreats"; // default
-  const headers = result.meta.fields || [];
-
-  if (headers.includes("retreatExpDays")) {
-    retreatExpUnit = "days";
-  } else if (headers.includes("retreatExpCount")) {
-    retreatExpUnit = "retreats";
-  }
 
   const attendees = result.data.map((row, index) => ({
     id: `attendee-${Date.now()}-${index}`,
@@ -34,10 +28,10 @@ export function parseCSV(csvText: string): ParseCSVResult {
     lgbtqia:
       row.isLGBTQIA?.toLowerCase() === "true" ||
       row.isLGBTQIA?.toLowerCase() === "yes",
-    retreatExp: parseInt(row.retreatExpDays || row.retreatExpCount) || 0,
+    retreatExp: parseRetreatExp(row.retreatExpCount),
   }));
 
-  return { attendees, retreatExpUnit };
+  return attendees;
 }
 
 export function parseGroupsCSV(csvText: string): Group[] {
@@ -62,7 +56,7 @@ export function parseGroupsCSV(csvText: string): Group[] {
       lgbtqia:
         row.isLGBTQIA?.toLowerCase() === "true" ||
         row.isLGBTQIA?.toLowerCase() === "yes",
-      retreatExp: parseInt(row.retreatExpDays || row.retreatExpCount) || 0,
+      retreatExp: parseRetreatExp(row.retreatExpCount),
     };
 
     if (!groupsMap.has(groupId)) {
@@ -73,7 +67,7 @@ export function parseGroupsCSV(csvText: string): Group[] {
         notes: row.groupNotes?.trim() || "",
         demographics: {
           avgAge: 0,
-          avgExperience: 0,
+          avgExperience: "0",
           bipocCount: 0,
           lgbtqiaCount: 0,
           genderDistribution: {},
@@ -88,13 +82,12 @@ export function parseGroupsCSV(csvText: string): Group[] {
   const groups = Array.from(groupsMap.values());
   groups.forEach((group) => {
     const members = group.members;
+    const avgExpNumeric = members.reduce((sum, m) => sum + getRetreatExpNumericValue(m.retreatExp), 0) / members.length;
     group.demographics = {
       avgAge: Math.round(
         members.reduce((sum, m) => sum + m.age, 0) / members.length,
       ),
-      avgExperience: Math.round(
-        members.reduce((sum, m) => sum + m.retreatExp, 0) / members.length,
-      ),
+      avgExperience: numericToRetreatExpLevel(avgExpNumeric),
       bipocCount: members.filter((m) => m.bipoc).length,
       lgbtqiaCount: members.filter((m) => m.lgbtqia).length,
       genderDistribution: members.reduce(
@@ -110,32 +103,21 @@ export function parseGroupsCSV(csvText: string): Group[] {
   return groups;
 }
 
-export function exportGroupsToCSV(
-  groups: Group[],
-  unit: RetreatExpUnit = "retreats",
-): void {
+export function exportGroupsToCSV(groups: Group[]): void {
   if (groups.length === 0) return;
 
   const csvData = groups.flatMap((group) => {
-    return group.members.map((member) => {
-      const baseRow = {
-        groupId: group.id,
-        teacherName: group.teacherName || "",
-        groupNotes: group.notes || "",
-        name: member.name,
-        age: member.age,
-        gender: member.gender,
-        isBIPOC: member.bipoc,
-        isLGBTQIA: member.lgbtqia,
-      };
-
-      // Use the appropriate column name based on unit
-      if (unit === "days") {
-        return { ...baseRow, retreatExpDays: member.retreatExp };
-      } else {
-        return { ...baseRow, retreatExpCount: member.retreatExp };
-      }
-    });
+    return group.members.map((member) => ({
+      groupId: group.id,
+      teacherName: group.teacherName || "",
+      groupNotes: group.notes || "",
+      name: member.name,
+      age: member.age,
+      gender: member.gender,
+      isBIPOC: member.bipoc,
+      isLGBTQIA: member.lgbtqia,
+      retreatExpCount: member.retreatExp,
+    }));
   });
 
   const csv = Papa.unparse(csvData);

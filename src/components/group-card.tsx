@@ -8,7 +8,6 @@ import { DraggableMember } from "./draggable-member";
 import { EmptyDropZone } from "./empty-drop-zone";
 import { TeacherCombobox } from "./teacher-combobox";
 import { Group } from "@/types";
-import { getRetreatExpSuffix } from "@/utils/retreat-exp";
 import { useAppStore } from "@/store/app-store";
 
 interface NotesTextareaProps {
@@ -76,7 +75,6 @@ export const GroupCard = memo(function GroupCard({
 }: GroupCardProps) {
   const {
     avoidSoloAffinity,
-    retreatExpUnit,
     visibleFields,
     moveMemberBetweenGroups,
     updateGroupTeacherName,
@@ -107,7 +105,6 @@ export const GroupCard = memo(function GroupCard({
                 memberIndex={index}
                 groupId={group.id}
                 moveMemberBetweenGroups={moveMemberBetweenGroups}
-                retreatExpUnit={retreatExpUnit}
                 visibleFields={visibleFields}
               />
             ))}
@@ -130,7 +127,6 @@ export const GroupCard = memo(function GroupCard({
             <div>
               <span className="text-muted-foreground">Avg Retreat Exp:</span>{" "}
               {group.demographics.avgExperience}
-              {getRetreatExpSuffix(retreatExpUnit)}
             </div>
             <div>
               {avoidSoloAffinity && group.demographics.bipocCount === 1 ? (

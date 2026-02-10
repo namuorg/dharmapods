@@ -7,9 +7,10 @@ import ReactECharts from "echarts-for-react";
 import { useAppStore } from "@/store/app-store";
 import { getAgeDistributionChartOptions } from "@/utils/charts/age-chart";
 import { getExperienceDistributionChartOptions } from "@/utils/charts/experience-chart";
+import { getRetreatExpNumericValue, numericToRetreatExpLevel } from "@/utils/retreat-exp";
 
 export function OverallDemographics() {
-  const { attendees, retreatExpUnit } = useAppStore();
+  const { attendees } = useAppStore();
   const [showAgeChart, setShowAgeChart] = useState(false);
   const [showExperienceChart, setShowExperienceChart] = useState(false);
 
@@ -17,9 +18,8 @@ export function OverallDemographics() {
     attendees.reduce((sum, a) => sum + a.age, 0) / attendees.length,
   );
 
-  const avgExperience = Math.round(
-    attendees.reduce((sum, a) => sum + a.retreatExp, 0) / attendees.length,
-  );
+  const avgExpNumeric = attendees.reduce((sum, a) => sum + getRetreatExpNumericValue(a.retreatExp), 0) / attendees.length;
+  const avgExperience = numericToRetreatExpLevel(avgExpNumeric);
 
   const bipocCount = attendees.filter((a) => a.bipoc).length;
   const bipocPercentage = Math.round((bipocCount / attendees.length) * 100);
@@ -66,7 +66,7 @@ export function OverallDemographics() {
               Avg Retreat Experience
             </h3>
             <p className="text-2xl font-bold text-slate-700">
-              {avgExperience} {retreatExpUnit || "retreats"}
+              {avgExperience}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               Click to view distribution
@@ -112,10 +112,7 @@ export function OverallDemographics() {
         {showExperienceChart && (
           <div className="mt-6 border-t pt-6">
             <ReactECharts
-              option={getExperienceDistributionChartOptions(
-                attendees,
-                retreatExpUnit,
-              )}
+              option={getExperienceDistributionChartOptions(attendees)}
               style={{ height: "300px" }}
             />
           </div>

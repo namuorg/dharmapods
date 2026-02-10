@@ -1,4 +1,9 @@
 import { Attendee, Group, GroupDemographics } from "@/types";
+import {
+  getRetreatExpNumericValue,
+  numericToRetreatExpLevel,
+  getRetreatExpOrder,
+} from "./retreat-exp";
 
 export function calculateGroupDemographics(
   members: Attendee[],
@@ -13,15 +18,16 @@ export function calculateGroupDemographics(
   );
   const bipocCount = members.filter((m) => m.bipoc).length;
   const lgbtqiaCount = members.filter((m) => m.lgbtqia).length;
-  const avgExperience =
-    members.reduce((sum, m) => sum + m.retreatExp, 0) / members.length;
+  const avgExpNumeric =
+    members.reduce((sum, m) => sum + getRetreatExpNumericValue(m.retreatExp), 0) /
+    members.length;
 
   return {
     avgAge: Math.round(avgAge),
     genderDistribution,
     bipocCount,
     lgbtqiaCount,
-    avgExperience: Math.round(avgExperience),
+    avgExperience: numericToRetreatExpLevel(avgExpNumeric),
   };
 }
 
@@ -68,7 +74,7 @@ export function distributeIntoGroups({
   } else {
     // Sort by experience for experience-based grouping
     sortedAttendees = [...attendees].sort(
-      (a, b) => a.retreatExp - b.retreatExp,
+      (a, b) => getRetreatExpOrder(a.retreatExp) - getRetreatExpOrder(b.retreatExp),
     );
   }
 
@@ -124,13 +130,13 @@ export function distributeIntoGroups({
     const sortedMembers =
       groupingMethod === "random"
         ? [...members] // Already shuffled, just copy
-        : [...members].sort((a, b) => a.retreatExp - b.retreatExp);
+        : [...members].sort((a, b) => getRetreatExpOrder(a.retreatExp) - getRetreatExpOrder(b.retreatExp));
 
     for (let i = 0; i < sortedMembers.length; i += 2) {
       if (i + 1 < sortedMembers.length) {
         // Create pair
         const pair = [sortedMembers[i], sortedMembers[i + 1]];
-        const avgExp = (pair[0].retreatExp + pair[1].retreatExp) / 2;
+        const avgExp = (getRetreatExpNumericValue(pair[0].retreatExp) + getRetreatExpNumericValue(pair[1].retreatExp)) / 2;
         affinityUnits.push({
           members: pair,
           avgExperience: avgExp,
@@ -153,7 +159,7 @@ export function distributeIntoGroups({
             unit.members.push(leftover);
             // Recalculate average experience
             unit.avgExperience =
-              unit.members.reduce((sum, m) => sum + m.retreatExp, 0) /
+              unit.members.reduce((sum, m) => sum + getRetreatExpNumericValue(m.retreatExp), 0) /
               unit.members.length;
             added = true;
             break;
@@ -164,7 +170,7 @@ export function distributeIntoGroups({
           // If no compatible pair found, create a single-person unit
           affinityUnits.push({
             members: [sortedMembers[i]],
-            avgExperience: sortedMembers[i].retreatExp,
+            avgExperience: getRetreatExpNumericValue(sortedMembers[i].retreatExp),
             affinityType,
           });
         }
@@ -219,7 +225,7 @@ export function distributeIntoGroups({
         nonAffinityIndex++;
       } else {
         // Compare average experience
-        if (currentAffinity.avgExperience <= currentNonAffinity.retreatExp) {
+        if (currentAffinity.avgExperience <= getRetreatExpNumericValue(currentNonAffinity.retreatExp)) {
           combinedList.push(currentAffinity);
           affinityIndex++;
         } else {

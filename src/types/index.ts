@@ -1,3 +1,7 @@
+export type RetreatExpLevel = "0" | "1-3" | "4-6" | "7+";
+
+export const RETREAT_EXP_LEVELS: RetreatExpLevel[] = ["0", "1-3", "4-6", "7+"];
+
 export interface Attendee {
   id: string;
   name: string;
@@ -5,7 +9,7 @@ export interface Attendee {
   gender: string;
   bipoc: boolean;
   lgbtqia: boolean;
-  retreatExp: number;
+  retreatExp: RetreatExpLevel;
 }
 
 export interface GroupDemographics {
@@ -13,7 +17,7 @@ export interface GroupDemographics {
   genderDistribution: Record<string, number>;
   bipocCount: number;
   lgbtqiaCount: number;
-  avgExperience: number;
+  avgExperience: RetreatExpLevel;
 }
 
 export interface Group {
@@ -23,8 +27,6 @@ export interface Group {
   teacherName?: string;
   notes?: string;
 }
-
-export type RetreatExpUnit = "retreats" | "days";
 
 export const DEFAULT_GROUP_SIZE = 8;
 export const DEFAULT_NUMBER_OF_GROUPS = 12;

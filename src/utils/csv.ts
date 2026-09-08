@@ -30,6 +30,7 @@ function parseAttendee(row: Record<string, string>, id: string): Attendee {
   return {
     id,
     firstName: row["First Name"]?.trim() || "",
+    preferredName: row["Preferred Name"]?.trim() || "",
     lastName: row["Last Name"]?.trim() || "",
     age: parseInt(row.Age) || 0,
     gender: row.Gender?.trim() || "",
@@ -126,6 +127,7 @@ export function exportGroupsToCSV(groups: Group[]): void {
       teacherName: group.teacherName || "",
       groupNotes: group.notes || "",
       "First Name": member.firstName,
+      "Preferred Name": member.preferredName,
       "Last Name": member.lastName,
       Age: member.age,
       Gender: member.gender,

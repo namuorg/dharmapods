@@ -61,13 +61,16 @@ export function AttendeeUpload() {
     <Card>
       <CardHeader>
         <CardTitle>Upload Attendees CSV</CardTitle>
-        <CardDescription>Required CSV columns:</CardDescription>
+        <CardDescription>Supported CSV columns:</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="mb-4 space-y-2">
           <div className="flex flex-wrap gap-2">
             <code className="px-2 py-1 bg-muted rounded-sm text-xs">
               First Name
+            </code>
+            <code className="px-2 py-1 bg-muted rounded-sm text-xs">
+              Preferred Name
             </code>
             <code className="px-2 py-1 bg-muted rounded-sm text-xs">
               Last Name

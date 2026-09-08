@@ -11,13 +11,19 @@ export function sortMembers(
 
   switch (sortBy) {
     case "name":
-      return sorted.sort((a, b) => a.name.localeCompare(b.name));
+      return sorted.sort((a, b) => {
+        const firstNameComparison = a.firstName.localeCompare(b.firstName);
+        return firstNameComparison || a.lastName.localeCompare(b.lastName);
+      });
 
     case "gender":
       return sorted.sort((a, b) => a.gender.localeCompare(b.gender));
 
     case "experience":
-      return sorted.sort((a, b) => getRetreatExpOrder(a.retreatExp) - getRetreatExpOrder(b.retreatExp));
+      return sorted.sort(
+        (a, b) =>
+          getRetreatExpOrder(a.retreatExp) - getRetreatExpOrder(b.retreatExp),
+      );
 
     case "age":
       return sorted.sort((a, b) => a.age - b.age);

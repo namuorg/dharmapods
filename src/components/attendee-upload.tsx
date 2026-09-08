@@ -66,7 +66,12 @@ export function AttendeeUpload() {
       <CardContent>
         <div className="mb-4 space-y-2">
           <div className="flex flex-wrap gap-2">
-            <code className="px-2 py-1 bg-muted rounded-sm text-xs">name</code>
+            <code className="px-2 py-1 bg-muted rounded-sm text-xs">
+              First Name
+            </code>
+            <code className="px-2 py-1 bg-muted rounded-sm text-xs">
+              Last Name
+            </code>
             <code className="px-2 py-1 bg-muted rounded-sm text-xs">age</code>
             <code className="px-2 py-1 bg-muted rounded-sm text-xs">
               gender

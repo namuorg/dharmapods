@@ -4,7 +4,8 @@ export const RETREAT_EXP_LEVELS: RetreatExpLevel[] = ["0", "1-3", "4-6", "7+"];
 
 export interface Attendee {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   age: number;
   gender: string;
   bipoc: boolean;

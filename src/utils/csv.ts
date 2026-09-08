@@ -1,6 +1,9 @@
 import Papa from "papaparse";
 import { Attendee, Group, RetreatExpLevel, RETREAT_EXP_LEVELS } from "@/types";
-import { getRetreatExpNumericValue, numericToRetreatExpLevel } from "./retreat-exp";
+import {
+  getRetreatExpNumericValue,
+  numericToRetreatExpLevel,
+} from "./retreat-exp";
 
 function parseRetreatExp(value: string | undefined): RetreatExpLevel {
   const trimmed = value?.trim() || "0";
@@ -19,7 +22,8 @@ export function parseCSV(csvText: string): Attendee[] {
 
   const attendees = result.data.map((row, index) => ({
     id: `attendee-${Date.now()}-${index}`,
-    name: row.name?.trim() || "",
+    firstName: row["First Name"]?.trim() || "",
+    lastName: row["Last Name"]?.trim() || "",
     age: parseInt(row.age) || 0,
     gender: row.gender?.trim() || "",
     bipoc:
@@ -47,7 +51,8 @@ export function parseGroupsCSV(csvText: string): Group[] {
     const groupId = parseInt(row.groupId) || 0;
     const member: Attendee = {
       id: `attendee-${Date.now()}-${Math.random()}`,
-      name: row.name?.trim() || "",
+      firstName: row["First Name"]?.trim() || "",
+      lastName: row["Last Name"]?.trim() || "",
       age: parseInt(row.age) || 0,
       gender: row.gender?.trim() || "",
       bipoc:
@@ -82,7 +87,11 @@ export function parseGroupsCSV(csvText: string): Group[] {
   const groups = Array.from(groupsMap.values());
   groups.forEach((group) => {
     const members = group.members;
-    const avgExpNumeric = members.reduce((sum, m) => sum + getRetreatExpNumericValue(m.retreatExp), 0) / members.length;
+    const avgExpNumeric =
+      members.reduce(
+        (sum, m) => sum + getRetreatExpNumericValue(m.retreatExp),
+        0,
+      ) / members.length;
     group.demographics = {
       avgAge: Math.round(
         members.reduce((sum, m) => sum + m.age, 0) / members.length,
@@ -111,7 +120,8 @@ export function exportGroupsToCSV(groups: Group[]): void {
       groupId: group.id,
       teacherName: group.teacherName || "",
       groupNotes: group.notes || "",
-      name: member.name,
+      "First Name": member.firstName,
+      "Last Name": member.lastName,
       age: member.age,
       gender: member.gender,
       isBIPOC: member.bipoc,

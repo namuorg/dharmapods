@@ -132,7 +132,9 @@ export function DraggableMember({
         ref={ref}
         className="text-sm cursor-move rounded flex items-stretch justify-between bg-white hover:bg-gray-50"
       >
-        <div className="py-2 pl-2">{member.name}</div>
+        <div className="py-2 pl-2">
+          {[member.firstName, member.lastName].filter(Boolean).join(" ")}
+        </div>
         <div className="flex items-stretch gap-2">
           {(visibleFields.has("bipoc") || visibleFields.has("lgbtqia")) && (
             <div className="flex items-center gap-2 py-2">

@@ -31,6 +31,16 @@ export function TeacherCombobox({
 }: TeacherComboboxProps) {
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const typedTeacherName = searchValue.trim();
+  const matchingTeacherNames = existingTeacherNames.filter((name) =>
+    name.toLocaleLowerCase().startsWith(typedTeacherName.toLocaleLowerCase()),
+  );
+
+  const selectTeacher = (name: string) => {
+    onChange(name);
+    setOpen(false);
+    setSearchValue("");
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -46,11 +56,22 @@ export function TeacherCombobox({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0">
-        <Command>
+        <Command shouldFilter={false}>
           <CommandInput
             placeholder="Search teacher..."
             value={searchValue}
             onValueChange={setSearchValue}
+            onKeyDown={(event) => {
+              if (
+                event.key === "Enter" &&
+                !event.nativeEvent.isComposing &&
+                typedTeacherName &&
+                matchingTeacherNames.length === 0
+              ) {
+                event.preventDefault();
+                selectTeacher(typedTeacherName);
+              }
+            }}
           />
           <CommandList>
             <CommandEmpty
@@ -60,21 +81,18 @@ export function TeacherCombobox({
             >
               {searchValue ? (
                 <button
+                  type="button"
                   className="w-full p-2 text-left hover:bg-accent"
-                  onClick={() => {
-                    onChange(searchValue);
-                    setOpen(false);
-                    setSearchValue("");
-                  }}
+                  onClick={() => selectTeacher(typedTeacherName)}
                 >
-                  Add &quot;{searchValue}&quot; as new teacher
+                  Add &quot;{typedTeacherName}&quot; as new teacher
                 </button>
               ) : (
                 "No teacher found."
               )}
             </CommandEmpty>
             <CommandGroup>
-              {value && (
+              {value && !typedTeacherName && (
                 <CommandItem
                   value="clear"
                   onSelect={() => {
@@ -86,15 +104,11 @@ export function TeacherCombobox({
                   <span className="text-muted-foreground">Clear selection</span>
                 </CommandItem>
               )}
-              {existingTeacherNames.map((name) => (
+              {matchingTeacherNames.map((name) => (
                 <CommandItem
                   key={name}
                   value={name}
-                  onSelect={() => {
-                    onChange(name);
-                    setOpen(false);
-                    setSearchValue("");
-                  }}
+                  onSelect={() => selectTeacher(name)}
                 >
                   {name}
                   <Check

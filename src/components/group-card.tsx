@@ -130,7 +130,7 @@ export const GroupCard = memo(function GroupCard({
             </div>
             <div>
               {avoidSoloAffinity && group.demographics.bipocCount === 1 ? (
-                <Badge variant="destructive" className="text-xs">
+                <Badge variant="warning" className="text-xs">
                   BIPOC: {group.demographics.bipocCount}
                 </Badge>
               ) : (
@@ -142,7 +142,7 @@ export const GroupCard = memo(function GroupCard({
             </div>
             <div>
               {avoidSoloAffinity && group.demographics.lgbtqiaCount === 1 ? (
-                <Badge variant="destructive" className="text-xs">
+                <Badge variant="warning" className="text-xs">
                   LGBTQIA: {group.demographics.lgbtqiaCount}
                 </Badge>
               ) : (

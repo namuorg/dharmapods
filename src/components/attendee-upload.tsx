@@ -72,18 +72,16 @@ export function AttendeeUpload() {
             <code className="px-2 py-1 bg-muted rounded-sm text-xs">
               Last Name
             </code>
-            <code className="px-2 py-1 bg-muted rounded-sm text-xs">age</code>
+            <code className="px-2 py-1 bg-muted rounded-sm text-xs">Age</code>
             <code className="px-2 py-1 bg-muted rounded-sm text-xs">
-              gender
+              Gender
+            </code>
+            <code className="px-2 py-1 bg-muted rounded-sm text-xs">BIPOC</code>
+            <code className="px-2 py-1 bg-muted rounded-sm text-xs">
+              LGBTQIA
             </code>
             <code className="px-2 py-1 bg-muted rounded-sm text-xs">
-              isBIPOC
-            </code>
-            <code className="px-2 py-1 bg-muted rounded-sm text-xs">
-              isLGBTQIA
-            </code>
-            <code className="px-2 py-1 bg-muted rounded-sm text-xs">
-              retreatExpCount
+              Retreat Experience
             </code>
           </div>
         </div>

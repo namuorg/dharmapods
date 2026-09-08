@@ -13,6 +13,32 @@ function parseRetreatExp(value: string | undefined): RetreatExpLevel {
   return "0";
 }
 
+function parseBoolean(value: string | undefined): boolean {
+  const normalized = value?.trim().toLowerCase();
+  return normalized === "true" || normalized === "yes";
+}
+
+function getLgbtqiaValue(row: Record<string, string>): string | undefined {
+  const columnName = Object.keys(row).find((header) =>
+    header.toLowerCase().includes("lgbt"),
+  );
+
+  return columnName ? row[columnName] : undefined;
+}
+
+function parseAttendee(row: Record<string, string>, id: string): Attendee {
+  return {
+    id,
+    firstName: row["First Name"]?.trim() || "",
+    lastName: row["Last Name"]?.trim() || "",
+    age: parseInt(row.Age) || 0,
+    gender: row.Gender?.trim() || "",
+    bipoc: parseBoolean(row.BIPOC),
+    lgbtqia: parseBoolean(getLgbtqiaValue(row)),
+    retreatExp: parseRetreatExp(row["Retreat Experience"]),
+  };
+}
+
 export function parseCSV(csvText: string): Attendee[] {
   const result = Papa.parse<Record<string, string>>(csvText, {
     header: true,
@@ -20,20 +46,9 @@ export function parseCSV(csvText: string): Attendee[] {
     transformHeader: (header) => header.trim(),
   });
 
-  const attendees = result.data.map((row, index) => ({
-    id: `attendee-${Date.now()}-${index}`,
-    firstName: row["First Name"]?.trim() || "",
-    lastName: row["Last Name"]?.trim() || "",
-    age: parseInt(row.age) || 0,
-    gender: row.gender?.trim() || "",
-    bipoc:
-      row.isBIPOC?.toLowerCase() === "true" ||
-      row.isBIPOC?.toLowerCase() === "yes",
-    lgbtqia:
-      row.isLGBTQIA?.toLowerCase() === "true" ||
-      row.isLGBTQIA?.toLowerCase() === "yes",
-    retreatExp: parseRetreatExp(row.retreatExpCount),
-  }));
+  const attendees = result.data.map((row, index) =>
+    parseAttendee(row, `attendee-${Date.now()}-${index}`),
+  );
 
   return attendees;
 }
@@ -49,20 +64,10 @@ export function parseGroupsCSV(csvText: string): Group[] {
 
   result.data.forEach((row) => {
     const groupId = parseInt(row.groupId) || 0;
-    const member: Attendee = {
-      id: `attendee-${Date.now()}-${Math.random()}`,
-      firstName: row["First Name"]?.trim() || "",
-      lastName: row["Last Name"]?.trim() || "",
-      age: parseInt(row.age) || 0,
-      gender: row.gender?.trim() || "",
-      bipoc:
-        row.isBIPOC?.toLowerCase() === "true" ||
-        row.isBIPOC?.toLowerCase() === "yes",
-      lgbtqia:
-        row.isLGBTQIA?.toLowerCase() === "true" ||
-        row.isLGBTQIA?.toLowerCase() === "yes",
-      retreatExp: parseRetreatExp(row.retreatExpCount),
-    };
+    const member = parseAttendee(
+      row,
+      `attendee-${Date.now()}-${Math.random()}`,
+    );
 
     if (!groupsMap.has(groupId)) {
       groupsMap.set(groupId, {
@@ -122,11 +127,11 @@ export function exportGroupsToCSV(groups: Group[]): void {
       groupNotes: group.notes || "",
       "First Name": member.firstName,
       "Last Name": member.lastName,
-      age: member.age,
-      gender: member.gender,
-      isBIPOC: member.bipoc,
-      isLGBTQIA: member.lgbtqia,
-      retreatExpCount: member.retreatExp,
+      Age: member.age,
+      Gender: member.gender,
+      BIPOC: member.bipoc,
+      LGBTQIA: member.lgbtqia,
+      "Retreat Experience": member.retreatExp,
     }));
   });
 

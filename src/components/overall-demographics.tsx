@@ -7,6 +7,7 @@ import ReactECharts from "echarts-for-react";
 import { useAppStore } from "@/store/app-store";
 import { getAgeDistributionChartOptions } from "@/utils/charts/age-chart";
 import { getExperienceDistributionChartOptions } from "@/utils/charts/experience-chart";
+import { getGenderDistributionLabel } from "@/utils/gender";
 import { getRetreatExpNumericValue, numericToRetreatExpLevel } from "@/utils/retreat-exp";
 
 export function OverallDemographics() {
@@ -29,7 +30,8 @@ export function OverallDemographics() {
 
   const genderDistribution = attendees.reduce(
     (acc, a) => {
-      acc[a.gender] = (acc[a.gender] || 0) + 1;
+      const gender = getGenderDistributionLabel(a.gender);
+      acc[gender] = (acc[gender] || 0) + 1;
       return acc;
     },
     {} as Record<string, number>,

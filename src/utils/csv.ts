@@ -4,6 +4,7 @@ import {
   getRetreatExpNumericValue,
   numericToRetreatExpLevel,
 } from "./retreat-exp";
+import { getGenderDistributionLabel } from "./gender";
 
 function parseRetreatExp(value: string | undefined): RetreatExpLevel {
   const trimmed = value?.trim() || "0";
@@ -26,6 +27,14 @@ function getLgbtqiaValue(row: Record<string, string>): string | undefined {
   return columnName ? row[columnName] : undefined;
 }
 
+function getGenderValue(row: Record<string, string>): string | undefined {
+  const columnName = Object.keys(row).find((header) =>
+    header.toLowerCase().includes("gender"),
+  );
+
+  return columnName ? row[columnName] : undefined;
+}
+
 function parseAttendee(row: Record<string, string>, id: string): Attendee {
   return {
     id,
@@ -33,7 +42,7 @@ function parseAttendee(row: Record<string, string>, id: string): Attendee {
     preferredName: row["Preferred Name"]?.trim() || "",
     lastName: row["Last Name"]?.trim() || "",
     age: parseInt(row.Age) || 0,
-    gender: row.Gender?.trim() || "",
+    gender: getGenderValue(row)?.trim() || "",
     bipoc: parseBoolean(row.BIPOC),
     lgbtqia: parseBoolean(getLgbtqiaValue(row)),
     retreatExp: parseRetreatExp(row["Retreat Experience"]),
@@ -107,7 +116,8 @@ export function parseGroupsCSV(csvText: string): Group[] {
       lgbtqiaCount: members.filter((m) => m.lgbtqia).length,
       genderDistribution: members.reduce(
         (acc, m) => {
-          acc[m.gender] = (acc[m.gender] || 0) + 1;
+          const gender = getGenderDistributionLabel(m.gender);
+          acc[gender] = (acc[gender] || 0) + 1;
           return acc;
         },
         {} as Record<string, number>,

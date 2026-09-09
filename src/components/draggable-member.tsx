@@ -123,6 +123,14 @@ export function DraggableMember({
     return () => document.removeEventListener("dragover", handleDragMove);
   }, [isDraggedOver]);
 
+  const showPreferredName =
+    member.preferredName.trim() !== "" &&
+    member.preferredName
+      .trim()
+      .localeCompare(member.firstName.trim(), undefined, {
+        sensitivity: "accent",
+      }) !== 0;
+
   return (
     <div className="relative">
       {isDraggedOver && closestEdge === "top" && (
@@ -134,7 +142,7 @@ export function DraggableMember({
       >
         <div className="py-2 pl-2">
           {[member.firstName, member.lastName].filter(Boolean).join(" ")}
-          {member.preferredName && (
+          {showPreferredName && (
             <span className="text-muted-foreground">
               {` (${member.preferredName})`}
             </span>

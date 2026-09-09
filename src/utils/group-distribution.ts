@@ -1,4 +1,5 @@
 import { Attendee, Group, GroupDemographics } from "@/types";
+import { getGenderDistributionLabel } from "./gender";
 import {
   getRetreatExpNumericValue,
   numericToRetreatExpLevel,
@@ -11,7 +12,8 @@ export function calculateGroupDemographics(
   const avgAge = members.reduce((sum, m) => sum + m.age, 0) / members.length;
   const genderDistribution = members.reduce(
     (acc, m) => {
-      acc[m.gender] = (acc[m.gender] || 0) + 1;
+      const gender = getGenderDistributionLabel(m.gender);
+      acc[gender] = (acc[gender] || 0) + 1;
       return acc;
     },
     {} as Record<string, number>,
